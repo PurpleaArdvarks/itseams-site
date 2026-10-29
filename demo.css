@@ -45,6 +45,8 @@
   background: var(--bezel);
   box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 18px 40px rgba(16, 24, 40, 0.18);
 }
+/* The island: a black pill over the top of the screen, between the time and the icons. */
+.phone::before { content: ""; position: absolute; top: 16px; left: 50%; width: 80px; height: 22px; margin-left: -40px; border-radius: 999px; background: #000; z-index: 4; pointer-events: none; }
 .screen {
   height: min(560px, 62vh);
   min-height: 420px;
