@@ -136,8 +136,12 @@
 .signup strong { display: block; font-size: 13px; margin-bottom: 2px; }
 .signup p { margin: 0 0 10px; color: var(--pg-muted); font-size: 11px; }
 .signup .row { display: flex; gap: 6px; }
-.signup .field { flex: 1; height: 28px; border-radius: 6px; background: var(--pg-bg); border: 1px solid var(--pg-line-2); color: var(--pg-muted); font-size: 11px; display: flex; align-items: center; padding: 0 8px; }
-.signup .go { height: 28px; padding: 0 10px; border-radius: 6px; background: var(--pg-text); color: var(--pg-bg); font-size: 11px; font-weight: 600; display: flex; align-items: center; }
+/* 16px keeps iOS from zooming the page when the field is tapped. */
+.signup .field { flex: 1; min-width: 0; height: 30px; border-radius: 6px; background: var(--pg-bg); border: 1px solid var(--pg-line-2); color: var(--pg-text); font: 600 16px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; padding: 0 8px; }
+.signup .field::placeholder { color: var(--pg-muted); font-weight: 400; }
+.signup .field:focus { outline: 2px solid var(--cut); outline-offset: 0; }
+.signup .go { height: 30px; padding: 0 10px; border-radius: 6px; border: 0; cursor: pointer; background: var(--pg-text); color: var(--pg-bg); font: 600 11px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; display: flex; align-items: center; }
+.signup .go:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .related { margin: 6px 16px 0; padding-top: 12px; border-top: 1px solid var(--pg-line); }
 .related strong { display: block; font-size: 12px; margin-bottom: 8px; }
