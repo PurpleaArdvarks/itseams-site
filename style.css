@@ -28,7 +28,7 @@ body {
   font: 17px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
 }
 .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 64px; }
-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 40px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-weight: 700; font-size: 20px; }
 .mark { width: 28px; height: 22px; border-radius: 6px; background: var(--accent); position: relative; }
 .mark::after { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: var(--bg); }
@@ -52,9 +52,11 @@ footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--rule);
 footer a { color: var(--muted); }
 
 /* Home */
-.hero { margin: 8px 0 40px; }
-.hero h1 { font-size: 44px; margin-bottom: 14px; }
-.hero .lede { max-width: 34em; margin-bottom: 18px; }
+.hero { margin: 0; }
+.hero h1 { font-size: 40px; margin-bottom: 8px; }
+.hero .lede { max-width: 34em; font-size: 18px; margin-bottom: 12px; }
+#demo.section { margin-top: 32px; }
+#demo .section-lede { margin-bottom: 16px; }
 .store-note { display: inline-block; font-size: 14px; font-weight: 600; color: var(--muted); border: 1px solid var(--rule); border-radius: 999px; padding: 5px 14px; background: var(--card); }
 .section { margin-top: 64px; }
 .section > h2 { margin-top: 0; font-size: 26px; }
@@ -80,7 +82,13 @@ footer a { color: var(--muted); }
 }
 @media (max-width: 480px) {
   h1 { font-size: 30px; }
-  .hero h1 { font-size: 34px; }
+  .hero h1 { font-size: 28px; }
+  .hero .lede { font-size: 16px; margin-bottom: 10px; }
+  header { margin-bottom: 18px; }
+  .wrap { padding-top: 20px; }
+  #demo.section { margin-top: 22px; }
+  #demo > h2 { font-size: 20px; margin-bottom: 2px; }
+  #demo .section-lede { font-size: 15px; margin-bottom: 12px; }
   .lede { font-size: 18px; }
   nav a { margin-left: 12px; }
   .wrap { padding-left: 16px; padding-right: 16px; }

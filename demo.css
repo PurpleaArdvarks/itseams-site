@@ -191,3 +191,18 @@
 }
 .vh { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .chip[hidden], .panel[hidden] { display: none; }
+
+/* Phones: the controls sit beside a smaller phone, the status line below both. */
+@media (max-width: 639px) {
+  .demo-grid { grid-template-columns: auto minmax(0, 1fr); justify-items: stretch; align-items: center; gap: 12px; }
+  .phone { zoom: 0.7; }
+  .screen { height: min(620px, 64vh); min-height: 380px; }
+  .panel:not([hidden]) { display: contents; }
+  .steps { grid-column: 2; grid-row: 1; }
+  .steps li { margin: 0 0 10px; }
+  .steps li::before, .steps .hint { display: none; }
+  .steps .btn { width: 100%; font-size: 15px; padding: 10px 6px; min-height: 44px; }
+  .steps .seg { display: flex; flex-direction: column; width: 100%; }
+  .demo-status { grid-column: 1 / -1; margin: 0; font-size: 14px; min-height: 2.6em; padding: 10px 12px; }
+  .linkish { grid-column: 1 / -1; justify-self: start; }
+}
