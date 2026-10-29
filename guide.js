@@ -26,6 +26,7 @@
 
   var IDLE = 3000;        // ms without input before a hint shows
   var AUTO_IDLE = 4000;   // ms before the demo first plays itself
+  // Step pauses are long enough to read each change (owner: half the first speed).
   var MAX_SHOWS = 2;      // hints per step
   var MAX_PLAYS = 3;      // autoplay runs
 
@@ -73,15 +74,15 @@
   // MARK: Autoplay
 
   var script = [
-    [function () { btnClean.click(); }, 1800],
-    [function () { scrollTo(target, 40); }, 1800],
-    [function () { scrollTo(lastBand, 60); }, 1800],
-    [function () { btnApply.click(); }, 2200],
-    [function () { btnBefore.click(); }, 1800],
-    [function () { btnAfter.click(); }, 1400],
-    [function () { btnRedact.click(); scrollTo(name, 120); }, 1200],
-    [function () { if (name) name.click(); }, 2000],
-    [function () { btnReset.click(); }, 2500]
+    [function () { btnClean.click(); }, 3600],
+    [function () { scrollTo(target, 40); }, 3600],
+    [function () { scrollTo(lastBand, 60); }, 3600],
+    [function () { btnApply.click(); }, 4400],
+    [function () { btnBefore.click(); }, 3600],
+    [function () { btnAfter.click(); }, 2800],
+    [function () { btnRedact.click(); scrollTo(name, 120); }, 2400],
+    [function () { if (name) name.click(); }, 4000],
+    [function () { btnReset.click(); }, 5000]
   ];
 
   function play(i) {
