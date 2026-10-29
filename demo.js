@@ -59,8 +59,10 @@
       chip.appendChild(tag);
     }
     chip.addEventListener('click', function () {
-      setOn(band, chip.getAttribute('aria-pressed') !== 'true');
-      reviewSummary();
+      var on = chip.getAttribute('aria-pressed') !== 'true';
+      setOn(band, on);
+      if (state === 'applied') editApplied(band, on);
+      else reviewSummary();
     });
     band._chip = chip;
     band._maybe = maybe;
@@ -169,24 +171,45 @@
     say(plural(on.length, 'suggestion', 'suggestions') + ' applied. The page is ' + pct + '% shorter.');
   });
 
-  // 3. Before / After.
+  // 3. Before / After. Before shows every suggestion again, applied or skipped, so any of them can
+  // be added or taken out; After applies that choice.
   function showView(next) {
     if (state !== 'applied' || view === next) return;
     view = next;
     var anim = animated();
-    applied.forEach(function (b) {
-      if (next === 'before') {
-        setCut(b, false, anim);
-        b.classList.add('was-cut');
+    if (next === 'before') {
+      demo.classList.add('reviewing');
+      bands.forEach(function (b) {
+        var on = applied.indexOf(b) >= 0;
+        if (on) setCut(b, false, anim);
+        b.classList.toggle('was-cut', on);
         b.removeAttribute('aria-hidden');
-      } else {
+        setOn(b, on);
+        b._chip.hidden = false;
+      });
+      say('Before: the removed parts are shaded. Tap a label to add or skip a suggestion.');
+    } else {
+      demo.classList.remove('reviewing');
+      bands.forEach(function (b) {
+        b._chip.hidden = true;
         b.classList.remove('was-cut');
-        setCut(b, true, anim);
-        b.setAttribute('aria-hidden', 'true');
-      }
-    });
+        if (applied.indexOf(b) >= 0) {
+          setCut(b, true, anim);
+          b.setAttribute('aria-hidden', 'true');
+        }
+      });
+      say(applied.length ? 'After: ' + plural(applied.length, 'suggestion', 'suggestions') + ' applied.' : 'After: no suggestions applied.');
+    }
     setCompare(true);
-    say(next === 'before' ? 'Before: the removed parts are shaded.' : 'After: ' + plural(applied.length, 'suggestion', 'suggestions') + ' applied.');
+  }
+
+  // A label tapped in Before: add that suggestion to what's applied, or take it out.
+  function editApplied(band, on) {
+    var i = applied.indexOf(band);
+    if (on && i < 0) applied.push(band);
+    if (!on && i >= 0) applied.splice(i, 1);
+    band.classList.toggle('was-cut', on);
+    say((on ? 'Added. ' : 'Skipped. ') + plural(applied.length, 'suggestion', 'suggestions') + ' will be applied. Tap After to see it.');
   }
   btnBefore.addEventListener('click', function () { showView('before'); });
   btnAfter.addEventListener('click', function () { showView('after'); });

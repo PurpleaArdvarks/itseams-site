@@ -179,6 +179,7 @@
 /* Before view: show what was removed */
 .band.was-cut { background: repeating-linear-gradient(135deg, var(--cut-soft) 0 6px, transparent 6px 12px); box-shadow: 0 0 0 1.5px var(--cut) inset; }
 .band.was-cut > * { opacity: 0.55; }
+.demo.reviewing .band.sug.was-cut { background: repeating-linear-gradient(135deg, var(--cut-soft) 0 6px, transparent 6px 12px); }
 
 /* Controls */
 .panel { width: 100%; max-width: 380px; }
