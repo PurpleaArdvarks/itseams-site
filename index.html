@@ -3,9 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>itSeams</title>
-<meta name="description" content="itSeams turns screenshots and web pages into clean, long images on your iPhone and iPad.">
+<title>itSeams: clean, long screenshots</title>
+<meta name="description" content="itSeams cleans up screenshots, stitches them into one long image, captures whole web pages and redacts what's private, all on your iPhone and iPad.">
+<meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="itSeams">
+<meta property="og:title" content="itSeams: clean, long screenshots">
+<meta property="og:description" content="Clean up, stitch and redact screenshots on your iPhone and iPad. No account, no tracking.">
+<meta property="og:url" content="https://itseams.app/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/demo.css">
+<script src="/demo.js" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -14,22 +24,174 @@
   <nav><a href="/support/">Support</a><a href="/privacy/">Privacy</a></nav>
 </header>
 <main>
-  <h1>Clean, long screenshots.</h1>
-  <p class="lede">itSeams cuts away the clutter in a screenshot, stitches several into one long image, and captures whole web pages, all on your iPhone and iPad.</p>
-  <div class="card">
-    <ul>
-      <li>Cut out bars, empty space and anything you don't want, and redact what's private.</li>
-      <li>Stitch screenshots or a scrolling screen recording into one image.</li>
-      <li>Capture a whole web page as one long image.</li>
-      <li>Everything happens on your device. No account, no ads, no tracking.</li>
-    </ul>
-  </div>
-  <h2>Coming soon</h2>
-  <div class="card">
-    <p><strong>Print boards.</strong> Lay out every screenshot on one large sheet, up to 24 × 36 in, portrait or landscape: numbered, labelled with the date and source, and ready to print as an exact-size PDF.</p>
-    <p><strong>Edit record.</strong> An optional index page that lists each original's fingerprint, capture date and size, and marks every piece that was cut or redacted, so anyone can see what changed and check each piece against its original file.</p>
-  </div>
-  <p>Questions or feedback? See <a href="/support/">Support</a>.</p>
+  <section class="hero">
+    <h1>Clean, long screenshots.</h1>
+    <p class="lede">itSeams cuts the clutter out of screenshots, stitches them into one long image and captures whole web pages, all on your iPhone and iPad.</p>
+    <p class="store-note">Coming to the App Store</p>
+  </section>
+
+  <section class="section demo" id="demo" aria-labelledby="demo-title">
+    <h2 id="demo-title">Try it</h2>
+    <p class="section-lede">A sample web page capture. Clean it up, compare, then hide a name.</p>
+    <div class="demo-grid">
+      <div class="phone">
+        <div class="screen" id="screen" tabindex="0" role="region" aria-label="Sample page capture, scrollable">
+          <div class="pg" id="page">
+            <div class="band band-sbar" data-cut="Status bar" data-strength="strong">
+              <div class="sbar" aria-hidden="true"><span>9:41</span><span class="sb-icons"><span class="sb-sig"></span><span class="sb-bat"></span></span></div>
+            </div>
+            <div class="band">
+              <div class="site" aria-hidden="true"><span class="logo"><i></i><b></b></span><span class="menu"></span></div>
+            </div>
+            <div class="band">
+              <div class="pad">
+                <p class="kicker">Local</p>
+                <p class="hl">Local council approves new riverside park</p>
+                <p class="byline">By <button type="button" class="nm">Dana Whitfield</button> · 4 min read</p>
+              </div>
+            </div>
+            <div class="band">
+              <div class="photo" role="img" aria-label="Photo of green hills under a blue sky"></div>
+              <p class="cap">The site along the river path.</p>
+            </div>
+            <div class="band">
+              <div class="pad txt">
+                <p>Plans for a park along the river were approved on Tuesday. Councillor <button type="button" class="nm">Theo Marsh</button> said work could start in the spring.</p>
+                <div class="lines" aria-hidden="true"><span class="ln w100"></span><span class="ln w94"></span><span class="ln w60"></span></div>
+              </div>
+            </div>
+            <div class="band" data-cut="Ad" data-strength="strong">
+              <div class="ad"><small>Advertisement</small><div class="ad-box" aria-hidden="true"><span></span></div></div>
+            </div>
+            <div class="band">
+              <div class="pad lines" aria-hidden="true"><span class="ln w100"></span><span class="ln w88"></span><span class="ln w94"></span><span class="ln w45"></span></div>
+            </div>
+            <div class="band gap" data-cut="Empty space" data-strength="strong"></div>
+            <div class="band">
+              <div class="pad txt">
+                <p>“It’s a place for everyone,” said <button type="button" class="nm">Ines Calder</button>, who lives nearby.</p>
+                <div class="lines" aria-hidden="true"><span class="ln w94"></span><span class="ln w100"></span><span class="ln w72"></span></div>
+              </div>
+            </div>
+            <div class="band" data-cut="Sign-up" data-strength="maybe">
+              <div class="signup">
+                <strong>Subscribe to our newsletter</strong>
+                <p>The week’s local news, every Friday.</p>
+                <div class="row" aria-hidden="true"><span class="field">Email address</span><span class="go">Sign up</span></div>
+              </div>
+            </div>
+            <div class="band">
+              <div class="related">
+                <strong>Related</strong>
+                <div class="rel" aria-hidden="true"><i></i><span><span class="ln w94"></span><span class="ln w60"></span></span></div>
+                <div class="rel" aria-hidden="true"><i></i><span><span class="ln w88"></span><span class="ln w45"></span></span></div>
+                <div class="rel" aria-hidden="true"><i></i><span><span class="ln w100"></span><span class="ln w72"></span></span></div>
+              </div>
+            </div>
+            <div class="band">
+              <div class="foot" aria-hidden="true"><span class="ln w45"></span><span class="ln w60"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel" hidden>
+        <ol class="steps">
+          <li><div><button type="button" class="btn primary" id="btn-clean">Clean Up</button>
+            <span class="hint">Spots the clutter. Nothing changes yet.</span></div></li>
+          <li><div><button type="button" class="btn" id="btn-apply" disabled>Apply</button>
+            <span class="hint">Tap a label on the page to switch it on or off.</span></div></li>
+          <li><div><div class="seg" role="group" aria-label="Compare">
+              <button type="button" class="btn" id="btn-before" aria-pressed="false" disabled>Before</button>
+              <button type="button" class="btn" id="btn-after" aria-pressed="true" disabled>After</button>
+            </div></div></li>
+          <li><div><button type="button" class="btn" id="btn-redact" aria-pressed="false">Redact</button>
+            <span class="hint">Then tap a name on the page.</span></div></li>
+        </ol>
+        <p class="demo-status" id="status" role="status" aria-live="polite">Scroll the page, then tap Clean Up.</p>
+        <button type="button" class="linkish" id="btn-reset">Start over</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="features-title">
+    <h2 id="features-title">What it does</h2>
+    <div class="features">
+      <div class="card">
+        <h3>Clean Up</h3>
+        <p>Spots status bars, empty space, sponsored posts and, on web pages, newsletter sign-ups. You review each suggestion; nothing changes until you tap Apply, and you can undo any step.</p>
+      </div>
+      <div class="card">
+        <h3>Stitch</h3>
+        <p>Join overlapping screenshots, or a screen recording of a scrolling page, into one long image. itSeams shows where each pair was joined.</p>
+      </div>
+      <div class="card">
+        <h3>Web Page Capture <span class="tag-pro">Pro</span></h3>
+        <p>Open a page in a private browser and save the whole thing as one long image. The browsing session is erased when you finish.</p>
+      </div>
+      <div class="card">
+        <h3>Redact</h3>
+        <p>Cover names, codes and faces with a solid block, pixelate or blur. A solid block replaces the pixels completely.</p>
+      </div>
+      <div class="card">
+        <h3>Export</h3>
+        <p>Save a new photo, split a long image for posts, or make a PDF. Location and device details are removed by default, and your originals are never changed.</p>
+      </div>
+      <div class="card">
+        <h3>Shortcuts</h3>
+        <p>Clean your latest screenshot from Shortcuts or the Action Button without opening the app. Anything uncertain is left for you to review.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="privacy-title">
+    <h2 id="privacy-title">Private by design</h2>
+    <div class="card">
+      <p class="label-big">Data Not Collected</p>
+      <ul class="checks">
+        <li>No account and no sign-in.</li>
+        <li>No ads, no tracking, no analytics.</li>
+        <li>Your images are processed on your device and never uploaded.</li>
+      </ul>
+    </div>
+    <p class="note">Read the <a href="/privacy/">Privacy Policy</a>.</p>
+  </section>
+
+  <section class="section" aria-labelledby="pricing-title">
+    <h2 id="pricing-title">Free and Pro</h2>
+    <div class="plans">
+      <div class="card">
+        <h3>Free</h3>
+        <p class="price">Everything you need to clean up a screenshot.</p>
+        <ul class="checks">
+          <li>Clean Up suggestions and cutting</li>
+          <li>Redaction</li>
+          <li>Every join style</li>
+          <li>Export, Shortcuts and presets</li>
+          <li>Stitch up to 3 screenshots</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>itSeams Pro</h3>
+        <p class="price">One-time purchase. Family Sharing included.</p>
+        <ul class="checks">
+          <li>Web Page Capture</li>
+          <li>Unlimited Stitch, including screen recordings</li>
+          <li>Project Folders</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">Your first 2 web page captures and 5 screen-recording stitches are free.</p>
+  </section>
+
+  <section class="section" aria-labelledby="soon-title">
+    <h2 id="soon-title">Coming soon</h2>
+    <div class="card">
+      <p><strong>Print boards.</strong> Lay out every screenshot on one large sheet, up to 24 × 36 in, portrait or landscape: numbered, labelled with the date and source, and ready to print as an exact-size PDF.</p>
+      <p><strong>Edit record.</strong> An optional index page that lists each original's fingerprint, capture date and size, and marks every piece that was cut or redacted, so anyone can see what changed and check each piece against its original file.</p>
+    </div>
+    <p>Questions or feedback? See <a href="/support/">Support</a>.</p>
+  </section>
 </main>
 <footer>© 2026 Scott Donald · <a href="/privacy/">Privacy Policy</a> · <a href="/support/">Support</a></footer>
 </div>
