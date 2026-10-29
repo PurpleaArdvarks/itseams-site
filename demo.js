@@ -266,6 +266,25 @@
     });
   });
 
+  // Status bar: time, signal and battery each answer with a short popdown.
+  var phone = demo.querySelector('.phone');
+  var pop = document.createElement('div');
+  pop.className = 'sb-pop off';
+  pop.setAttribute('role', 'status');
+  phone.appendChild(pop);
+  var popTimer = 0;
+  function hidePop() { pop.classList.add('off'); }
+  toArray(page.querySelectorAll('.sb-btn')).forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      pop.textContent = b.getAttribute('data-say');
+      pop.classList.remove('off');
+      clearTimeout(popTimer);
+      popTimer = setTimeout(hidePop, 2800);
+    });
+  });
+  document.addEventListener('click', hidePop);
+
   // Start over.
   btnReset.addEventListener('click', function () {
     state = 'idle';

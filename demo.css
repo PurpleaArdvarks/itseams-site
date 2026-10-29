@@ -75,12 +75,14 @@
 .sb-bat { width: 20px; height: 10px; border: 1.5px solid currentColor; border-radius: 3px; position: relative; opacity: 0.9; }
 .sb-bat::after { content: ""; position: absolute; inset: 1.5px; right: 4px; background: currentColor; border-radius: 1px; }
 
-.site { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--pg-line); }
+.sb-btn { font: inherit; color: inherit; background: none; border: 0; padding: 3px 4px; margin: -3px -4px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; }
+.sb-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sb-pop { position: absolute; left: 50%; top: 46px; transform: translateX(-50%); width: calc(100% - 48px); max-width: 250px; z-index: 7; padding: 9px 12px; border-radius: 12px; background: rgba(24, 27, 33, 0.92); color: #fff; font: 500 12px/1.35 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; text-align: center; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); transition: opacity 0.2s, transform 0.2s; }
+.sb-pop.off { opacity: 0; transform: translate(-50%, -6px); pointer-events: none; }
+.site { display: flex; align-items: center; padding: 10px 16px 4px; }
 .logo { display: flex; align-items: center; gap: 7px; }
 .logo i { width: 18px; height: 18px; border-radius: 5px; background: var(--pg-text); opacity: 0.85; display: block; }
 .logo b { width: 64px; height: 8px; border-radius: 4px; background: var(--pg-line-2); display: block; }
-.menu { width: 16px; height: 10px; border-top: 2px solid var(--pg-muted); border-bottom: 2px solid var(--pg-muted); position: relative; }
-.menu::after { content: ""; position: absolute; left: 0; right: 0; top: 2px; height: 2px; background: var(--pg-muted); }
 
 .pad { padding: 0 16px; }
 .kicker { margin: 14px 0 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cut); }
@@ -236,6 +238,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .sb-pop { transition: none; }
   .btn.hint-pulse { animation: none; box-shadow: 0 0 0 3px var(--accent); }
   .ghost.on .ghost-dot, .ghost.on .ghost-trail { animation: none; }
   .ghost-trail { display: none; }
