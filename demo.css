@@ -208,6 +208,9 @@
 .demo-status { min-height: 3.2em; margin: 6px 0 10px; padding: 12px 14px; border-radius: 12px; background: var(--card); border: 1px solid var(--rule); font-size: 15px; }
 .linkish { font: inherit; font-size: 15px; background: none; border: 0; padding: 4px 0; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 
+.autoplay-badge { position: absolute; left: 50%; top: -12px; transform: translateX(-50%); z-index: 6; white-space: nowrap; font: 600 12px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color: #fff; background: var(--accent); padding: 6px 10px; border-radius: 999px; box-shadow: 0 2px 8px rgba(16, 24, 40, 0.2); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.autoplay-badge.on { opacity: 1; }
+
 /* Idle guide (guide.js): a pulsing ring on the next button, or a finger swiping up in the phone. */
 .btn.hint-pulse { animation: hint-ring 1.6s ease-out infinite; }
 @keyframes hint-ring {
