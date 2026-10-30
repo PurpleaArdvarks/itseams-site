@@ -1,0 +1,56 @@
+/* Long-form pages (Support, Privacy). Load after style.css; it uses the same color tokens.
+   Below 1100 px this file only hides the section lists, so the phone layout comes from style.css.
+   To adopt it on another page: add class "doc-page" to body and "doc" to main. */
+
+.toc { display: none; }
+[id] { scroll-margin-top: 24px; }
+h2:target, section:target > h2 { color: var(--accent); }
+
+@media (min-width: 1100px) {
+  /* A step up from style.css. */
+  .doc-page { font-size: 18px; line-height: 1.6; }
+  .doc-page h1 { font-size: 48px; margin-bottom: 14px; }
+  .doc-page h2 { font-size: 26px; margin: 56px 0 12px; }
+  .doc-page .lede { font-size: 22px; line-height: 1.45; margin-bottom: 0; }
+  .doc-page .updated { font-size: 16px; margin: 0; }
+  .doc-page header { margin-bottom: 48px; }
+  .doc-page nav a { font-size: 16px; }
+  .doc-page footer { font-size: 15px; margin-top: 88px; }
+
+  /* style.css gives every main the home page's two-column grid at this width. */
+  main.doc { display: block; }
+
+  /* Heading on the left, its card on the right. */
+  .doc-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 37em); column-gap: 72px; align-items: start; }
+  .doc-head.even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .doc-head .card { margin: 0; }
+
+  /* Section list beside the text. 37em keeps lines near 75 characters. */
+  .doc-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 37em); column-gap: 72px; align-items: start; margin-top: 16px; }
+  .doc-body > .doc-text > section:first-child > h2 { margin-top: 32px; }
+
+  .toc { display: block; position: sticky; top: 32px; max-height: calc(100vh - 64px); overflow-y: auto; padding-top: 32px; font-size: 16px; }
+  .toc-title { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  .toc ul { list-style: none; margin: 0; padding: 0; }
+  .toc li { margin: 0; }
+  .doc-page .toc ul a { display: block; margin: 0; padding: 5px 0; color: var(--muted); font-size: 16px; }
+  .doc-page .toc ul a:hover { color: var(--text); }
+  .doc-page .toc-note a { margin: 0; font-size: inherit; color: var(--accent); }
+  .toc-note { margin: 20px 0 0; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 15px; line-height: 1.5; }
+
+  /* The same list as a row, for pages whose questions need the full width. */
+  .toc-row { position: static; max-height: none; overflow: visible; padding: 0; margin-top: 40px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .toc-row ul { display: flex; flex-wrap: wrap; gap: 4px 32px; padding: 8px 0; }
+
+  /* Questions in two columns; each stays near 60 characters a line. */
+  .qa { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 48px; margin: 20px 0 0; }
+  .qa > div { border-top: 1px solid var(--rule); padding-top: 16px; }
+  .qa dt { margin-top: 0; }
+
+  .duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 48px; }
+  .duo ul { margin-top: 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}

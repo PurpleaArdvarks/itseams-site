@@ -12,42 +12,150 @@
 <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/pages.css">
 </head>
-<body>
+<body class="doc-page">
 <div class="wrap">
 <header>
   <a class="brand" href="/"><span class="mark" aria-hidden="true"></span>itSeams</a>
   <nav><a href="/support/" aria-current="page">Support</a><a href="/privacy/">Privacy</a></nav>
 </header>
-<main>
-  <h1>Support</h1>
-  <p class="lede">Need help, found a problem, or have an idea? Email us and we'll get back to you.</p>
+<main class="doc">
+  <div class="doc-head even">
+    <div>
+      <h1>Support</h1>
+      <p class="lede">Need help, found a problem, or have an idea? Email us and we'll get back to you.</p>
+    </div>
 
-  <div class="card">
-    <p><strong>Email:</strong> <a href="mailto:support@itseams.app">support@itseams.app</a></p>
-    <p>If something went wrong, tell us your iPhone or iPad model, the iOS version and what you were doing. A screenshot helps, but please leave out anything private.</p>
+    <div class="card">
+      <p><strong>Email:</strong> <a href="mailto:support@itseams.app">support@itseams.app</a></p>
+      <p>If something went wrong, tell us your iPhone or iPad model, the iOS version and what you were doing. A screenshot helps, but please leave out anything private. See <a href="#email">what to include</a>.</p>
+    </div>
   </div>
 
-  <h2>Common questions</h2>
-  <dl>
-    <dt>How do I restore itSeams Pro on a new device?</dt>
-    <dd>Open Settings (the gear on Home) › itSeams Pro and tap Restore Purchases while signed in to the same Apple Account. Family Sharing is on, so people in your family group can use Pro too.</dd>
+  <nav class="toc toc-row" aria-label="On this page">
+    <ul>
+      <li><a href="#questions">Common questions</a></li>
+      <li><a href="#purchases">Purchases</a></li>
+      <li><a href="#requirements">Requirements</a></li>
+      <li><a href="#email">What to include in an email</a></li>
+      <li><a href="#delete">Deleting your data</a></li>
+      <li><a href="#privacy">Privacy</a></li>
+    </ul>
+  </nav>
 
-    <dt>What's free and what needs Pro?</dt>
-    <dd>Cutting, redaction, suggestions, every join style, presets, Shortcuts, stitching up to 3 screenshots, and exporting as the original, split for posts or for messaging are free. Pro adds unlimited stitching (including screen recordings), Web Page Capture (including pages sent from Safari), Short post, Story and Print / PDF exports, batch editing (edit one screenshot and the same cuts and redactions go on every other screenshot like it, such as 30 of the same app screen), and Project Folders. Your first 3 web page captures and 10 recording stitches are free.</dd>
+  <section id="questions">
+    <h2>Common questions</h2>
+    <dl class="qa">
+      <div>
+        <dt>Does itSeams change my original photos?</dt>
+        <dd>No. Saving always adds a new photo. Your originals are never changed or deleted.</dd>
+      </div>
+      <div>
+        <dt>Where is my work saved?</dt>
+        <dd>Each image you open becomes a project on your device, so you can come back to it. Delete projects from Home or the Projects screen when you're done.</dd>
+      </div>
+      <div>
+        <dt>Will my projects move to a new iPhone or iPad?</dt>
+        <dd>No. Projects stay on the device and aren't in your device backups. Save or share finished images before you switch.</dd>
+      </div>
+      <div>
+        <dt>Which files can itSeams open?</dt>
+        <dd>PNG, JPEG and HEIC images. Stitch also takes screen recordings.</dd>
+      </div>
+      <div>
+        <dt>Will Clean Up remove things without asking?</dt>
+        <dd>Not in the editor: nothing changes until you tap Apply. Shortcuts and Batch apply only the suggestions they're confident about and leave the rest for you to review.</dd>
+      </div>
+      <div>
+        <dt>Why won't a web page open?</dt>
+        <dd>Web Page Capture opens https pages only. To capture an older site without https, turn on Settings › Web Capture › Allow Insecure (http) Pages.</dd>
+      </div>
+    </dl>
+  </section>
 
-    <dt>Does itSeams change my original photos?</dt>
-    <dd>No. Saving always adds a new photo. Your originals are never changed or deleted.</dd>
+  <section id="purchases">
+    <h2>Purchases</h2>
+    <dl class="qa">
+      <div>
+        <dt>How do I restore itSeams Pro on a new device?</dt>
+        <dd>Open Settings (the gear on Home) › itSeams Pro and tap Restore Purchases while signed in to the same Apple Account. Family Sharing is on, so people in your family group can use Pro too.</dd>
+      </div>
+      <div>
+        <dt>What's free and what needs Pro?</dt>
+        <dd>Cutting, redaction, suggestions, every join style, presets, Shortcuts, stitching up to 3 screenshots, and exporting as the original, split for posts or for messaging are free. Pro is a one-time purchase. It adds stitching up to 20 screenshots and screen recordings, Web Page Capture (including pages sent from Safari), Short post, Story and Print / PDF exports, batch editing (edit one screenshot and the same cuts and redactions go on every other screenshot like it, such as 30 of the same app screen), and Project Folders. Your first 3 web page captures and 10 recording stitches are free.</dd>
+      </div>
+      <div>
+        <dt>Does reinstalling reset my free captures?</dt>
+        <dd>No. The count stays on your device when you delete the app. A capture or stitch that fails or that you cancel doesn't count.</dd>
+      </div>
+      <div>
+        <dt>How do I get a refund?</dt>
+        <dd>Purchases are handled by Apple. Request a refund at reportaproblem.apple.com.</dd>
+      </div>
+    </dl>
+  </section>
 
-    <dt>Where is my work saved?</dt>
-    <dd>Each image you open becomes a project on your device, so you can come back to it. Delete projects from Home or the Projects screen when you're done.</dd>
+  <div class="duo">
+    <section id="requirements">
+      <h2>Requirements</h2>
+      <ul>
+        <li>iPhone or iPad.</li>
+        <li>iOS 17.0 or iPadOS 17.0, or later.</li>
+        <li>No account.</li>
+        <li>Editing, stitching and exporting work offline. Web Page Capture needs a connection, and so does buying or restoring Pro.</li>
+      </ul>
+    </section>
 
-    <dt>How do I get a refund?</dt>
-    <dd>Purchases are handled by Apple. Request a refund at reportaproblem.apple.com.</dd>
-  </dl>
+    <section id="email">
+      <h2>What to include in an email</h2>
+      <ul>
+        <li>Your iPhone or iPad model and iOS version.</li>
+        <li>The itSeams version, from Settings › About.</li>
+        <li>What you did, what happened, and what you expected.</li>
+        <li>The exact words of any error message.</li>
+        <li>For a crash or freeze, the reports from Settings › Help › Share Diagnostics. They hold no screenshots or page addresses.</li>
+        <li>A screenshot, if it helps. Redact anything private first.</li>
+      </ul>
+    </section>
+  </div>
 
-  <h2>Privacy</h2>
-  <p>itSeams collects no data. Read the <a href="/privacy/">Privacy Policy</a>.</p>
+  <section id="delete">
+    <h2>Deleting your data</h2>
+    <p>Your data is on your device, so you delete it there. We have no account or server holding it.</p>
+    <dl class="qa">
+      <div>
+        <dt>One project</dt>
+        <dd>Touch and hold it on Home and choose Delete, or delete it on the Projects screen. This removes the edit and itSeams's copy of the original. Photos in your library aren't affected.</dd>
+      </div>
+      <div>
+        <dt>All projects</dt>
+        <dd>On the Projects screen, tap More › Delete All Projects. This can't be undone. It also erases the ad measurements.</dd>
+      </div>
+      <div>
+        <dt>What itSeams learned</dt>
+        <dd>Go to Settings › Suggestions and tap Forget What Was Learned. Turn off Learn From My Edits to stop learning.</dd>
+      </div>
+      <div>
+        <dt>Saved pages</dt>
+        <dd>In Settings › Saved Pages, use Clear Recent Pages, Clear Try Later or Delete All Bookmarks.</dd>
+      </div>
+      <div>
+        <dt>Diagnostics</dt>
+        <dd>In Settings › Help, tap Delete Diagnostics.</dd>
+      </div>
+      <div>
+        <dt>Everything</dt>
+        <dd>Delete the app. Your free-use count and the key used for blur and pixelate stay on the device; neither holds your images. Older device backups can still hold your settings and what itSeams learned until you delete those backups.</dd>
+      </div>
+    </dl>
+    <p>Images you saved or shared aren't affected by any of this. Delete them where you put them. If you emailed us, your email stays in our mailbox.</p>
+  </section>
+
+  <section id="privacy">
+    <h2>Privacy</h2>
+    <p>itSeams collects no data. Read the <a href="/privacy/">Privacy Policy</a>.</p>
+  </section>
 </main>
 <footer>© 2026 Scott Donald · <a href="/privacy/">Privacy Policy</a> · <a href="/support/">Support</a></footer>
 </div>
