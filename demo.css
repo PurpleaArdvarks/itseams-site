@@ -27,7 +27,7 @@
     --cut-soft: rgba(78, 161, 255, 0.16);
     --maybe: #f0b44c;
     --maybe-soft: rgba(240, 180, 76, 0.16);
-    --ink: #000000;
+    --ink: #f2f3f5; /* redactions read as solid boxes on the dark page */
   }
 }
 
