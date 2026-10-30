@@ -56,8 +56,9 @@
   -webkit-overflow-scrolling: touch;
   background: var(--pg-bg);
   color: var(--pg-text);
-  scrollbar-width: thin;
+  scrollbar-width: none; /* a real phone shows no scrollbar; the guide hints at scrolling */
 }
+.screen::-webkit-scrollbar { display: none; }
 .screen:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 
 /* Mock page */
