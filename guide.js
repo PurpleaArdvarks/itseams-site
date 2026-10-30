@@ -103,6 +103,8 @@
   function startPlaying() {
     if (touched || playing || plays >= MAX_PLAYS || (motion && motion.matches)) return false;
     playing = true;
+    var exBtn = document.getElementById('btn-export');
+    if (exBtn && exBtn.getAttribute('aria-expanded') === 'true') exBtn.click(); // close Export
     status.setAttribute('aria-live', 'off');
     badge.classList.add('on');
     play(0);

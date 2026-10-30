@@ -301,8 +301,229 @@
     });
   });
 
+  // 5. Export: the app's presets, simulated. Miniatures are clones of the page (with the applied
+  // cuts and redactions) in scaled, clipped frames; nothing is rendered to a file.
+  var btnExport = document.getElementById('btn-export');
+  var exPop = document.getElementById('ex-pop');
+  var exScrim = document.getElementById('ex-scrim');
+  var exSim = document.getElementById('ex-sim');
+  var exOpts = toArray(exPop.querySelectorAll('.ex-opt'));
+  var PW = 280;  // width the miniatures lay the page out at
+  // Atoms a cut never goes through: text lines, pictures, boxes.
+  var ATOMS = 'p, .ln, .photo, .vid-frame, .vid-cta, .ad small, .sbar, .site, .signup, .related > strong, .rel';
+  var letter = /-(US|CA|MX)$/i.test(navigator.language || '');
+  var PRESETS = {  // summaries from the app's ExportPreset
+    original: { sum: 'Full size, exactly as edited.' },
+    posts: { sum: 'Fixed-ratio images for carousel posts, cut between lines of content.', w: 66, r: 5 / 4 },
+    shortPost: { sum: 'Up to 4 images, each under a size limit, for posts that show only a few images.', w: 72, r: 5 / 4, max: 4 },
+    story: { sum: '1080 × 1920 images for full-screen stories.', w: 48, r: 16 / 9, center: true },
+    print: { sum: 'A PDF that fits the page width, with pages split between lines of content.', w: 66, r: letter ? 11 / 8.5 : 297 / 210, pad: 5 }
+  };
+  var preset = null;
+  var small = window.matchMedia ? window.matchMedia('(max-width: 639px)') : null;
+
+  function el(cls, tag) { var e = document.createElement(tag || 'div'); e.className = cls; return e; }
+
+  // The page as it would export: applied cuts removed, chips gone, names as plain (or covered) text.
+  function exportCopy() {
+    var c = page.cloneNode(true);
+    c.removeAttribute('id');
+    c.className = 'pg ex-mini';
+    toArray(c.querySelectorAll('[style]')).forEach(function (e) { e.removeAttribute('style'); });
+    toArray(c.querySelectorAll('.chip')).forEach(function (e) { e.parentNode.removeChild(e); });
+    var orig = toArray(page.querySelectorAll('.band'));
+    toArray(c.querySelectorAll('.band')).forEach(function (b, i) {
+      if (state === 'applied' && applied.indexOf(orig[i]) >= 0) b.parentNode.removeChild(b);
+      else b.classList.remove('sug', 'off', 'maybe', 'was-cut', 'cut');
+    });
+    toArray(c.querySelectorAll('.nm')).forEach(function (n) {
+      var s = el(n.classList.contains('redacted') ? 'nm-x redacted' : 'nm-x', 'span');
+      s.textContent = n.textContent;
+      n.parentNode.replaceChild(s, n);
+    });
+    toArray(c.querySelectorAll('button')).forEach(function (b) { b.tabIndex = -1; });
+    return c;
+  }
+
+  // Page height and the blank gaps between atoms, in page pixels.
+  function measure(c) {
+    var box = el('ex-measure');
+    box.appendChild(c);
+    exSim.appendChild(box);
+    var top = c.getBoundingClientRect().top;
+    var H = c.offsetHeight;
+    var iv = toArray(c.querySelectorAll(ATOMS)).map(function (e) {
+      var r = e.getBoundingClientRect();
+      return [r.top - top, r.bottom - top];
+    }).filter(function (v) { return v[1] > v[0]; }).sort(function (a, b) { return a[0] - b[0]; });
+    var gaps = [];
+    var y = 0;
+    iv.forEach(function (v) { if (v[0] > y + 1) gaps.push([y, v[0]]); y = Math.max(y, v[1]); });
+    if (H > y + 1) gaps.push([y, H]);
+    exSim.removeChild(box);
+    box.removeChild(c);
+    return { H: H, gaps: gaps };
+  }
+
+  // Cuts at most `limit` apart, each in the lowest blank gap that fits (forced only if none).
+  function slices(m, limit) {
+    var out = [];
+    var s = 0;
+    out.forced = false;
+    while (m.H - s > limit + 1 && out.length < 19) {
+      var end = s + limit;
+      var low = s + limit * 0.3;
+      var best = 0;
+      m.gaps.forEach(function (g) {
+        if (g[1] <= low || g[0] >= end) return;
+        var y = Math.min(Math.max((g[0] + g[1]) / 2, low), end, g[1]);
+        if (y > best) best = y;
+      });
+      if (!best) { best = end; out.forced = true; }
+      out.push([s, best]);
+      s = best;
+    }
+    out.push([s, m.H]);
+    return out;
+  }
+
+  // One output frame w × h showing page rows s0..s1 at scale k.
+  function frame(c, w, h, s0, s1, k, opts) {
+    opts = opts || {};
+    var f = el('ex-frame');
+    f.style.width = w + 'px';
+    f.style.height = h + 'px';
+    var clip = el('ex-clip');
+    var cw = PW * k;
+    var ch = (s1 - s0) * k;
+    clip.style.width = cw + 'px';
+    clip.style.height = ch + 'px';
+    clip.style.left = (w - cw) / 2 + 'px';
+    clip.style.top = (opts.center ? (h - ch) / 2 : opts.pad || 0) + 'px';
+    var mini = c.cloneNode(true);
+    mini.style.transform = 'scale(' + k + ') translateY(' + -s0 + 'px)';
+    if ('inert' in mini) mini.inert = true;
+    clip.appendChild(mini);
+    f.appendChild(clip);
+    return f;
+  }
+
+  function renderExport() {
+    var p = PRESETS[preset];
+    var c = exportCopy();
+    var m = measure(c);
+    exSim.textContent = '';
+    exSim.className = 'ex-sim ex-' + preset + (animated() ? ' ex-anim' : '');
+    var n, cap;
+    if (preset === 'original') {
+      var k0 = Math.min(110 / PW, 240 / m.H);
+      exSim.appendChild(frame(c, PW * k0, m.H * k0, 0, m.H, k0));
+      cap = '1 image · full length';
+    } else {
+      var w = p.w;
+      var h = Math.round(w * p.r);
+      var pad = p.pad || 0;
+      var k = (w - 2 * pad) / PW;
+      var room = h - 2 * pad - (pad ? 4 : 0);  // PDF: a little space for the page number
+      var list = slices(m, room / k);
+      var narrowed = false;
+      while (p.max && list.length > p.max && k > 0.05) {
+        k *= 0.94;
+        narrowed = true;
+        list = slices(m, room / k);
+      }
+      // Source strip with the cut lines, then the outputs.
+      var ks = Math.min(44 / PW, 210 / m.H);
+      var src = el('ex-item ex-src');
+      src.appendChild(frame(c, PW * ks, m.H * ks, 0, m.H, ks));
+      list.slice(1).forEach(function (sl, i) {
+        var mark = el('ex-mark', 'i');
+        mark.style.top = sl[0] * ks + 'px';
+        mark.style.setProperty('--i', i);
+        src.appendChild(mark);
+      });
+      exSim.appendChild(src);
+      exSim.appendChild(el('ex-arrow'));
+      var outs = el('ex-outs');
+      list.forEach(function (sl, i) {
+        var item = el('ex-item');
+        item.style.setProperty('--i', i);
+        var f = frame(c, w, h, sl[0], sl[1], k, { center: p.center, pad: pad });
+        item.appendChild(f);
+        var num = el(pad ? 'ex-pn' : 'ex-n', 'span');
+        num.textContent = String(i + 1);
+        (pad ? f : item).appendChild(num);
+        outs.appendChild(item);
+      });
+      exSim.appendChild(outs);
+      n = list.length;
+      if (preset === 'posts') cap = plural(n, 'image', 'images') + ' · 4:5 · cut between lines' + (list.forced ? ' where possible' : '');
+      else if (preset === 'shortPost') cap = plural(n, 'image', 'images') + ' · 4:5 · each under 5 MB' + (narrowed ? ' · narrowed to fit' : '');
+      else if (preset === 'story') cap = plural(n, 'image', 'images') + ' · 9:16 · 1080 × 1920';
+      else cap = plural(n, 'page', 'pages') + ' · ' + (letter ? 'Letter' : 'A4') + ' PDF · numbered';
+    }
+    document.getElementById('ex-sum').textContent = p.sum;
+    document.getElementById('ex-cap').textContent = cap;
+    var covered = coveredCount();
+    document.getElementById('ex-note').textContent = 'Simulated from the ' +
+      (state === 'applied' && applied.length ? 'cleaned-up page' : 'page as captured') +
+      (covered ? ', ' + plural(covered, 'name', 'names') + ' covered' : '') + '. Nothing is saved.';
+  }
+
+  function choose(id) {
+    preset = id;
+    exOpts.forEach(function (o) { o.setAttribute('aria-pressed', o.getAttribute('data-preset') === id ? 'true' : 'false'); });
+    renderExport();
+  }
+
+  function exportOpen() { return !exPop.hidden; }
+
+  function openExport() {
+    exPop.hidden = false;
+    exScrim.hidden = false;
+    btnExport.setAttribute('aria-expanded', 'true');
+    if (!preset) {
+      // Like the app: Split for posts for tall outputs (height > 2.5 × width), otherwise Original.
+      preset = measure(exportCopy()).H > 2.5 * PW ? 'posts' : 'original';
+    }
+    choose(preset);
+    exOpts.filter(function (o) { return o.getAttribute('data-preset') === preset; })[0].focus();
+    if (!(small && small.matches) && exPop.scrollIntoView) {
+      try { exPop.scrollIntoView({ block: 'nearest', behavior: animated() ? 'smooth' : 'auto' }); } catch (e) { /* older engines */ }
+    }
+  }
+
+  function closeExport(refocus) {
+    if (!exportOpen()) return;
+    exPop.hidden = true;
+    exScrim.hidden = true;
+    btnExport.setAttribute('aria-expanded', 'false');
+    exSim.textContent = '';
+    if (refocus) btnExport.focus();
+  }
+
+  btnExport.addEventListener('click', function () {
+    if (exportOpen()) closeExport(true);
+    else openExport();
+  });
+  document.getElementById('ex-close').addEventListener('click', function () { closeExport(true); });
+  exOpts.forEach(function (o) {
+    o.addEventListener('click', function () { choose(o.getAttribute('data-preset')); });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (exportOpen() && (e.key === 'Escape' || e.key === 'Esc')) { e.preventDefault(); closeExport(true); }
+  });
+  document.addEventListener('pointerdown', function (e) {
+    if (exportOpen() && !exPop.contains(e.target) && !btnExport.contains(e.target)) closeExport(false);
+  }, true);
+  exPop.addEventListener('focusout', function (e) {
+    var to = e.relatedTarget;
+    if (to && !exPop.contains(to) && to !== btnExport) closeExport(false);
+  });
+
   // Start over.
   btnReset.addEventListener('click', function () {
+    closeExport(false);
     state = 'idle';
     view = 'after';
     applied = [];
