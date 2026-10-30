@@ -32,16 +32,19 @@
 
   var motion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
 
+  // A mouse or trackpad gets a scroll-wheel hint; a finger gets a swipe.
+  var clicks = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)').matches : false;
+
   var ghost = document.createElement('div');
-  ghost.className = 'ghost';
+  ghost.className = clicks ? 'ghost mouse' : 'ghost';
   ghost.setAttribute('aria-hidden', 'true');
-  ghost.innerHTML = '<span class="ghost-trail"></span><span class="ghost-dot"></span><span class="ghost-label">Scroll</span>';
+  ghost.innerHTML = '<span class="ghost-trail"></span><span class="ghost-dot"></span><span class="ghost-mouse"></span><span class="ghost-label">Scroll</span>';
   phone.appendChild(ghost);
 
   var badge = document.createElement('div');
   badge.className = 'autoplay-badge';
   badge.setAttribute('aria-hidden', 'true');
-  badge.textContent = 'Playing · Tap to try';
+  badge.textContent = clicks ? 'Playing · Click to try' : 'Playing · Tap to try';
   phone.appendChild(badge);
 
   var touched = false;  // the visitor has used the demo

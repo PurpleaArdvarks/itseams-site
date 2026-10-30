@@ -231,6 +231,16 @@
 .ghost.on .ghost-dot { animation: ghost-swipe 2.4s cubic-bezier(0.45, 0, 0.15, 1) infinite; }
 .ghost.on .ghost-trail { animation: ghost-trail 2.4s cubic-bezier(0.45, 0, 0.15, 1) infinite; }
 .ghost-label { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); font: 600 12px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color: #fff; background: rgba(0, 0, 0, 0.6); padding: 4px 8px; border-radius: 999px; }
+.ghost-mouse { display: none; }
+.ghost.mouse .ghost-dot, .ghost.mouse .ghost-trail { display: none; }
+.ghost.mouse .ghost-mouse { display: block; position: absolute; left: 50%; top: 4px; width: 24px; height: 36px; margin-left: -12px; border: 2px solid #fff; border-radius: 13px; background: rgba(0, 0, 0, 0.45); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); }
+.ghost.mouse .ghost-mouse::after { content: ""; position: absolute; left: 50%; top: 6px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: #fff; }
+.ghost.mouse.on .ghost-mouse::after { animation: ghost-wheel 1.4s ease-in-out infinite; }
+@keyframes ghost-wheel {
+  0% { transform: translateY(0); opacity: 1; }
+  70% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 0; }
+}
 @keyframes ghost-swipe {
   0% { transform: translateY(0) scale(0.5); opacity: 0; }
   15% { transform: translateY(0) scale(1.05); opacity: 1; }
@@ -245,6 +255,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ghost.mouse.on .ghost-mouse::after { animation: none; }
   .sb-pop { transition: none; }
   .btn.hint-pulse { animation: none; box-shadow: 0 0 0 3px var(--accent); }
   .ghost.on .ghost-dot, .ghost.on .ghost-trail { animation: none; }

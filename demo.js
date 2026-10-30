@@ -26,7 +26,12 @@
 
   function toArray(list) { return Array.prototype.slice.call(list); }
   function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
-  function say(text) { status.textContent = text; }
+  // A mouse or trackpad clicks; a finger taps.
+  var clicks = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)').matches : false;
+  function words(text) { return clicks ? text.replace(/\bTap\b/g, 'Click').replace(/\btap\b/g, 'click') : text; }
+  function say(text) { status.textContent = words(text); }
+  toArray(demo.querySelectorAll('.hint')).forEach(function (h) { h.textContent = words(h.textContent); });
+  status.textContent = words(status.textContent);
 
   var bands = toArray(page.querySelectorAll('.band[data-cut]'));
   var names = toArray(page.querySelectorAll('.nm'));
@@ -138,7 +143,7 @@
     var strong = bands.filter(function (b) { return !b._maybe; }).length;
     var maybe = bands.length - strong;
     var text = plural(bands.length, 'suggestion', 'suggestions') + ' found. ' + strong + ' ' + (strong === 1 ? 'is' : 'are') + ' on';
-    if (maybe) text += ', and ' + maybe + ' Maybe ' + (maybe === 1 ? 'waits' : 'wait') + ' for your tap';
+    if (maybe) text += ', and ' + maybe + ' Maybe ' + (maybe === 1 ? 'waits' : 'wait') + ' for you';
     say(text + '. Scroll the page to review them.');
   });
 
