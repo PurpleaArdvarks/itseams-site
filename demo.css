@@ -94,7 +94,7 @@
 .photo {
   height: 150px; margin: 0 16px; border-radius: 8px; position: relative; overflow: hidden; background: #cfe6f5;
 }
-.photo svg { display: block; width: 100%; height: 100%; }
+.photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
 @media (prefers-color-scheme: dark) {
   .photo { filter: brightness(0.82) saturate(0.9); }
 }
@@ -118,7 +118,8 @@
 .vs-hub { fill: #aeb3bb; }
 .vs-dash { animation: vs-road 1.2s linear infinite; }
 @keyframes vs-road { to { transform: translateX(-40px); } }
-.vid-play { position: absolute; left: 50%; top: 42%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: rgba(0, 0, 0, 0.55); }
+.vid-play { border: 0; padding: 0; cursor: pointer; position: absolute; left: 50%; top: 42%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: rgba(0, 0, 0, 0.55); }
+.vid-play:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .vid-play::after { content: ""; position: absolute; left: 13px; top: 10px; border-style: solid; border-width: 7px 0 7px 11px; border-color: transparent transparent transparent #fff; }
 .vid-bar { position: absolute; left: 8px; right: 40px; bottom: 8px; height: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.45); }
 .vid-bar i { display: block; width: 35%; height: 100%; border-radius: 2px; background: #fff; }
@@ -139,10 +140,7 @@
 .signup strong { display: block; font-size: 13px; margin-bottom: 2px; }
 .signup p { margin: 0 0 10px; color: var(--pg-muted); font-size: 11px; }
 .signup .row { display: flex; gap: 6px; }
-/* 16px keeps iOS from zooming the page when the field is tapped. */
-.signup .field { flex: 1; min-width: 0; height: 30px; border-radius: 6px; background: var(--pg-bg); border: 1px solid var(--pg-line-2); color: var(--pg-text); font: 600 16px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; padding: 0 8px; }
-.signup .field::placeholder { color: var(--pg-muted); font-weight: 400; }
-.signup .field:focus { outline: 2px solid var(--cut); outline-offset: 0; }
+.signup .field { flex: 1; min-width: 0; height: 30px; border-radius: 6px; background: var(--pg-bg); border: 1px solid var(--pg-line-2); color: var(--pg-muted); font-size: 11px; display: flex; align-items: center; padding: 0 8px; }
 .signup .go { height: 30px; padding: 0 10px; border-radius: 6px; border: 0; cursor: pointer; background: var(--pg-text); color: var(--pg-bg); font: 600 11px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; display: flex; align-items: center; }
 .signup .go:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 

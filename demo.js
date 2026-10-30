@@ -293,31 +293,13 @@
   });
   document.addEventListener('click', hidePop);
 
-  // The sign-up box: whatever is typed comes out as one sentence, and nothing is sent anywhere.
-  var PHRASE = 'THIS IS THE BEST APP EVER.';
-  var field = page.querySelector('.signup .field');
-  var signUp = page.querySelector('.signup .go');
-  if (field && signUp) {
-    field.addEventListener('input', function () {
-      field.value = PHRASE.slice(0, Math.min(field.value.length, PHRASE.length));
-    });
-    field.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); signUp.click(); }
-    });
-    signUp.addEventListener('click', function (e) {
+  // The car ad's play button and the sign-up box answer like the status bar does.
+  toArray(page.querySelectorAll('.vid-play, .signup .go')).forEach(function (b) {
+    b.addEventListener('click', function (e) {
       e.stopPropagation();
-      showPop(field.value ? 'We agree. (It’s a demo, so nothing was sent.)' : 'Type anything. It’ll say the right thing.');
+      showPop(b.getAttribute('data-say'));
     });
-    // Older iOS still zooms into fields; stop that only while this one is in use.
-    var viewport = document.querySelector('meta[name="viewport"]');
-    var viewportContent = viewport && viewport.getAttribute('content');
-    if (viewport && viewportContent && viewportContent.indexOf('maximum-scale') < 0) {
-      field.addEventListener('touchstart', function () {
-        viewport.setAttribute('content', viewportContent + ', maximum-scale=1');
-      }, { passive: true });
-      field.addEventListener('blur', function () { viewport.setAttribute('content', viewportContent); });
-    }
-  }
+  });
 
   // Start over.
   btnReset.addEventListener('click', function () {
