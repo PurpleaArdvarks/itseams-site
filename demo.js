@@ -301,173 +301,136 @@
     });
   });
 
-  // 5. Export: the app's presets, simulated. Miniatures are clones of the page (with the applied
-  // cuts and redactions) in scaled, clipped frames; nothing is rendered to a file.
+  // 5. Export: three of the app's presets as cartoons. The cut count comes from the real page
+  // (applied cuts removed, cuts between lines of content); nothing is rendered to a file.
   var btnExport = document.getElementById('btn-export');
   var exPop = document.getElementById('ex-pop');
   var exScrim = document.getElementById('ex-scrim');
   var exSim = document.getElementById('ex-sim');
+  var exCap = document.getElementById('ex-cap');
   var exOpts = toArray(exPop.querySelectorAll('.ex-opt'));
-  var PW = 280;  // width the miniatures lay the page out at
-  // Atoms a cut never goes through: text lines, pictures, boxes.
+  var NS = 'http://www.w3.org/2000/svg';
+  var PW = 280;  // page width the cuts are measured at
+  // Blocks a cut never goes through: text lines, pictures, boxes.
   var ATOMS = 'p, .ln, .photo, .vid-frame, .vid-cta, .ad small, .sbar, .site, .signup, .related > strong, .rel';
-  var letter = /-(US|CA|MX)$/i.test(navigator.language || '');
-  var PRESETS = {  // summaries from the app's ExportPreset
-    original: { sum: 'Full size, exactly as edited.' },
-    posts: { sum: 'Fixed-ratio images for carousel posts, cut between lines of content.', w: 66, r: 5 / 4 },
-    shortPost: { sum: 'Up to 4 images, each under a size limit, for posts that show only a few images.', w: 72, r: 5 / 4, max: 4 },
-    story: { sum: '1080 × 1920 images for full-screen stories.', w: 48, r: 16 / 9, center: true },
-    print: { sum: 'A PDF that fits the page width, with pages split between lines of content.', w: 66, r: letter ? 11 / 8.5 : 297 / 210, pad: 5 }
-  };
-  var preset = null;
-  var small = window.matchMedia ? window.matchMedia('(max-width: 639px)') : null;
+  var PAGE_H = PW * (/-(US|CA|MX)$/i.test(navigator.language || '') ? 11 / 8.5 : 297 / 210);
+  var preset = 'posts';
 
-  function el(cls, tag) { var e = document.createElement(tag || 'div'); e.className = cls; return e; }
-
-  // The page as it would export: applied cuts removed, chips gone, names as plain (or covered) text.
-  function exportCopy() {
+  // Cut positions (0..1 of the exported page) at most `limit` page pixels apart, in blank gaps.
+  function cuts(limit) {
     var c = page.cloneNode(true);
     c.removeAttribute('id');
-    c.className = 'pg ex-mini';
-    toArray(c.querySelectorAll('[style]')).forEach(function (e) { e.removeAttribute('style'); });
-    toArray(c.querySelectorAll('.chip')).forEach(function (e) { e.parentNode.removeChild(e); });
+    c.className = 'pg ex-measure';
+    toArray(c.querySelectorAll('[style], .chip')).forEach(function (e) {
+      if (e.classList.contains('chip')) e.parentNode.removeChild(e); else e.removeAttribute('style');
+    });
     var orig = toArray(page.querySelectorAll('.band'));
     toArray(c.querySelectorAll('.band')).forEach(function (b, i) {
       if (state === 'applied' && applied.indexOf(orig[i]) >= 0) b.parentNode.removeChild(b);
-      else b.classList.remove('sug', 'off', 'maybe', 'was-cut', 'cut');
     });
-    toArray(c.querySelectorAll('.nm')).forEach(function (n) {
-      var s = el(n.classList.contains('redacted') ? 'nm-x redacted' : 'nm-x', 'span');
-      s.textContent = n.textContent;
-      n.parentNode.replaceChild(s, n);
-    });
-    toArray(c.querySelectorAll('button')).forEach(function (b) { b.tabIndex = -1; });
-    return c;
-  }
-
-  // Page height and the blank gaps between atoms, in page pixels.
-  function measure(c) {
-    var box = el('ex-measure');
-    box.appendChild(c);
-    exSim.appendChild(box);
+    exPop.appendChild(c);
     var top = c.getBoundingClientRect().top;
     var H = c.offsetHeight;
     var iv = toArray(c.querySelectorAll(ATOMS)).map(function (e) {
       var r = e.getBoundingClientRect();
       return [r.top - top, r.bottom - top];
-    }).filter(function (v) { return v[1] > v[0]; }).sort(function (a, b) { return a[0] - b[0]; });
+    }).sort(function (a, b) { return a[0] - b[0]; });
+    exPop.removeChild(c);
     var gaps = [];
     var y = 0;
     iv.forEach(function (v) { if (v[0] > y + 1) gaps.push([y, v[0]]); y = Math.max(y, v[1]); });
-    if (H > y + 1) gaps.push([y, H]);
-    exSim.removeChild(box);
-    box.removeChild(c);
-    return { H: H, gaps: gaps };
-  }
-
-  // Cuts at most `limit` apart, each in the lowest blank gap that fits (forced only if none).
-  function slices(m, limit) {
+    gaps.push([y, H]);
     var out = [];
     var s = 0;
-    out.forced = false;
-    while (m.H - s > limit + 1 && out.length < 19) {
-      var end = s + limit;
+    while (H - s > limit + 1 && out.length < 19) {
       var low = s + limit * 0.3;
-      var best = 0;
-      m.gaps.forEach(function (g) {
-        if (g[1] <= low || g[0] >= end) return;
-        var y = Math.min(Math.max((g[0] + g[1]) / 2, low), end, g[1]);
-        if (y > best) best = y;
+      var best = s + limit;  // forced only when no gap fits
+      var found = 0;
+      gaps.forEach(function (g) {
+        if (g[1] > low && g[0] < s + limit) found = Math.max(found, Math.min(Math.max((g[0] + g[1]) / 2, low), s + limit, g[1]));
       });
-      if (!best) { best = end; out.forced = true; }
-      out.push([s, best]);
-      s = best;
+      s = found || best;
+      out.push(s / H);
     }
-    out.push([s, m.H]);
     return out;
   }
 
-  // One output frame w × h showing page rows s0..s1 at scale k.
-  function frame(c, w, h, s0, s1, k, opts) {
-    opts = opts || {};
-    var f = el('ex-frame');
-    f.style.width = w + 'px';
-    f.style.height = h + 'px';
-    var clip = el('ex-clip');
-    var cw = PW * k;
-    var ch = (s1 - s0) * k;
-    clip.style.width = cw + 'px';
-    clip.style.height = ch + 'px';
-    clip.style.left = (w - cw) / 2 + 'px';
-    clip.style.top = (opts.center ? (h - ch) / 2 : opts.pad || 0) + 'px';
-    var mini = c.cloneNode(true);
-    mini.style.transform = 'scale(' + k + ') translateY(' + -s0 + 'px)';
-    if ('inert' in mini) mini.inert = true;
-    clip.appendChild(mini);
-    f.appendChild(clip);
-    return f;
+  function svg(tag, attrs, cls, parent, i) {
+    var e = document.createElementNS(NS, tag);
+    Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (cls) e.setAttribute('class', cls);
+    if (i !== undefined) e.style.setProperty('--i', i);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  // A cartoon page: a sheet with text bars, and a picture when `pic`.
+  function sheet(g, x, y, w, h, pic, cls) {
+    svg('rect', { x: x, y: y, width: w, height: h, rx: 4 }, 'ex-sheet' + (cls ? ' ' + cls : ''), g);
+    var yy = y + 6;
+    if (pic) {
+      svg('rect', { x: x + 5, y: yy, width: w * 0.5, height: 4, rx: 2 }, 'ex-ink', g);
+      svg('rect', { x: x + 5, y: yy + 8, width: w - 10, height: h * 0.22, rx: 2 }, 'ex-pic', g);
+      yy += 12 + h * 0.22;
+    }
+    for (var n = 0; yy + 3 < y + h - 5; n++, yy += 7) {
+      svg('rect', { x: x + 5, y: yy, width: (w - 10) * [1, 0.9, 0.95, 0.6][n % 4], height: 3, rx: 1.5 }, 'ex-line', g);
+    }
   }
 
   function renderExport() {
-    var p = PRESETS[preset];
-    var c = exportCopy();
-    var m = measure(c);
     exSim.textContent = '';
-    exSim.className = 'ex-sim ex-' + preset + (animated() ? ' ex-anim' : '');
-    var n, cap;
+    var root = svg('svg', { viewBox: '0 0 268 132', focusable: 'false' }, animated() ? 'ex-art ex-anim' : 'ex-art', exSim);
     if (preset === 'original') {
-      var k0 = Math.min(110 / PW, 240 / m.H);
-      exSim.appendChild(frame(c, PW * k0, m.H * k0, 0, m.H, k0));
-      cap = '1 image · full length';
-    } else {
-      var w = p.w;
-      var h = Math.round(w * p.r);
-      var pad = p.pad || 0;
-      var k = (w - 2 * pad) / PW;
-      var room = h - 2 * pad - (pad ? 4 : 0);  // PDF: a little space for the page number
-      var list = slices(m, room / k);
-      var narrowed = false;
-      while (p.max && list.length > p.max && k > 0.05) {
-        k *= 0.94;
-        narrowed = true;
-        list = slices(m, room / k);
-      }
-      // Source strip with the cut lines, then the outputs.
-      var ks = Math.min(44 / PW, 210 / m.H);
-      var src = el('ex-item ex-src');
-      src.appendChild(frame(c, PW * ks, m.H * ks, 0, m.H, ks));
-      list.slice(1).forEach(function (sl, i) {
-        var mark = el('ex-mark', 'i');
-        mark.style.top = sl[0] * ks + 'px';
-        mark.style.setProperty('--i', i);
-        src.appendChild(mark);
-      });
-      exSim.appendChild(src);
-      exSim.appendChild(el('ex-arrow'));
-      var outs = el('ex-outs');
-      list.forEach(function (sl, i) {
-        var item = el('ex-item');
-        item.style.setProperty('--i', i);
-        var f = frame(c, w, h, sl[0], sl[1], k, { center: p.center, pad: pad });
-        item.appendChild(f);
-        var num = el(pad ? 'ex-pn' : 'ex-n', 'span');
-        num.textContent = String(i + 1);
-        (pad ? f : item).appendChild(num);
-        outs.appendChild(item);
-      });
-      exSim.appendChild(outs);
-      n = list.length;
-      if (preset === 'posts') cap = plural(n, 'image', 'images') + ' · 4:5 · cut between lines' + (list.forced ? ' where possible' : '');
-      else if (preset === 'shortPost') cap = plural(n, 'image', 'images') + ' · 4:5 · each under 5 MB' + (narrowed ? ' · narrowed to fit' : '');
-      else if (preset === 'story') cap = plural(n, 'image', 'images') + ' · 9:16 · 1080 × 1920';
-      else cap = plural(n, 'page', 'pages') + ' · ' + (letter ? 'Letter' : 'A4') + ' PDF · numbered';
+      sheet(root, 104, 4, 60, 124, true, 'ex-piece');
+      exCap.textContent = 'One long image';
+      return;
     }
-    document.getElementById('ex-sum').textContent = p.sum;
-    document.getElementById('ex-cap').textContent = cap;
-    var covered = coveredCount();
-    document.getElementById('ex-note').textContent = 'Simulated from the ' +
-      (state === 'applied' && applied.length ? 'cleaned-up page' : 'page as captured') +
-      (covered ? ', ' + plural(covered, 'name', 'names') + ' covered' : '') + '. Nothing is saved.';
+    var pdf = preset === 'print';
+    var at = cuts(pdf ? PAGE_H * 0.92 : PW * 5 / 4);
+    var n = at.length + 1;
+    // The long page with dashed cut lines and scissors at the first.
+    sheet(root, 8, 4, 50, 124, true);
+    at.forEach(function (f, i) {
+      var y = 4 + f * 124;
+      svg('line', { x1: 2, y1: y, x2: 64, y2: y }, 'ex-cut', root, i);
+    });
+    if (at.length) {
+      var sc = svg('g', { transform: 'translate(60 ' + (4 + at[0] * 124) + ')' }, 'ex-scissors', root);
+      svg('circle', { cx: 6, cy: -3, r: 2.5 }, '', sc);
+      svg('circle', { cx: 6, cy: 3, r: 2.5 }, '', sc);
+      svg('path', { d: 'M8 -2 L15 2 M8 2 L15 -2' }, '', sc);
+    }
+    svg('path', { d: 'M78 66 h12 m-5 -5 l5 5 l-5 5' }, 'ex-arrow', root);
+    if (pdf) {
+      var layers = Math.min(n, 3);
+      for (var j = layers - 1; j >= 0; j--) {
+        var px = 140 + j * 8;
+        var py = 18 - j * 6;
+        if (j) svg('rect', { x: px, y: py, width: 74, height: 96, rx: 3 }, 'ex-sheet ex-paper ex-piece', root, layers - j);
+        else {
+          var front = svg('g', {}, 'ex-piece', root, layers);
+          svg('rect', { x: px, y: py, width: 74, height: 96, rx: 3 }, 'ex-sheet ex-paper', front);
+          sheet(front, px + 6, py + 6, 62, 74, true, 'ex-inner');
+          svg('text', { x: px + 37, y: py + 91, 'text-anchor': 'middle' }, 'ex-pn', front).textContent = '1 / ' + n;
+        }
+      }
+      exCap.textContent = plural(n, 'page', 'pages') + ' · PDF · split between lines';
+    } else {
+      var shown = Math.min(n, 8);
+      var rows = shown > 4 ? 2 : 1;
+      var per = Math.ceil(shown / rows);
+      for (var k = 0; k < shown; k++) {
+        var sw = per > 3 ? 36 : 46;
+        var sh = sw * 5 / 4;
+        var sx = 100 + (k % per) * (sw + 8);
+        var sy = (rows === 1 ? (122 - sh) / 2 : 8) + Math.floor(k / per) * 62;
+        var g = svg('g', {}, 'ex-piece', root, k);
+        sheet(g, sx, sy, sw, sh, k === 0);
+        svg('text', { x: sx + sw / 2, y: sy + sh + 10, 'text-anchor': 'middle' }, 'ex-num', g).textContent = String(k + 1);
+      }
+      exCap.textContent = plural(n, 'post', 'posts') + ' · 4:5 · cut between lines';
+    }
   }
 
   function choose(id) {
@@ -482,13 +445,9 @@
     exPop.hidden = false;
     exScrim.hidden = false;
     btnExport.setAttribute('aria-expanded', 'true');
-    if (!preset) {
-      // Like the app: Split for posts for tall outputs (height > 2.5 × width), otherwise Original.
-      preset = measure(exportCopy()).H > 2.5 * PW ? 'posts' : 'original';
-    }
     choose(preset);
     exOpts.filter(function (o) { return o.getAttribute('data-preset') === preset; })[0].focus();
-    if (!(small && small.matches) && exPop.scrollIntoView) {
+    if (exPop.scrollIntoView) {
       try { exPop.scrollIntoView({ block: 'nearest', behavior: animated() ? 'smooth' : 'auto' }); } catch (e) { /* older engines */ }
     }
   }

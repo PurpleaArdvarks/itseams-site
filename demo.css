@@ -280,13 +280,13 @@
   .linkish { grid-column: 1 / -1; justify-self: start; }
 }
 
-/* Export (demo.js step 5): a popup of the app's presets with a simulated result. */
+/* Export (demo.js step 5): a small card of presets with a cartoon of the result. */
 .ex-step { position: relative; }
 .ex-pop {
   position: absolute; z-index: 20; top: calc(100% + 8px); right: 0;
-  width: 360px; max-width: calc(100vw - 32px); padding: 12px 16px 14px;
+  width: 300px; max-width: calc(100vw - 32px); padding: 12px 14px;
   border-radius: 16px; background: var(--card); color: var(--text); border: 1px solid var(--rule);
-  box-shadow: 0 16px 40px rgba(16, 24, 40, 0.22); font-size: 14px; line-height: 1.4;
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.2); font-size: 14px; line-height: 1.4;
 }
 .ex-pop[hidden], .ex-scrim[hidden] { display: none; }
 .ex-scrim { display: none; }
@@ -295,47 +295,41 @@
 .ex-close { font: 600 15px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color: var(--accent); background: none; border: 0; padding: 8px 4px; margin: -8px -4px; cursor: pointer; }
 .ex-opts { display: flex; flex-wrap: wrap; gap: 6px; }
 .ex-opt {
-  display: inline-flex; align-items: center; min-height: 34px; padding: 6px 11px; border-radius: 999px; cursor: pointer;
+  display: inline-flex; align-items: center; min-height: 32px; padding: 5px 10px; border-radius: 999px; cursor: pointer;
   font: 600 13px/1.2 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   background: var(--bg); color: var(--text); border: 1px solid var(--rule);
 }
 .ex-opt:hover { border-color: var(--muted); }
 .ex-opt[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 .ex-opt .tag-pro { font-size: 9px; padding: 1px 6px; margin-left: 2px; vertical-align: 0; }
-.ex-sum { margin: 10px 0 8px; color: var(--muted); font-size: 13px; }
-.ex-sim { position: relative; display: flex; align-items: flex-start; justify-content: center; gap: 10px; min-height: 110px; padding: 12px; border-radius: 12px; background: var(--bg); overflow: hidden; }
-.ex-outs { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; min-width: 0; }
-.ex-shortPost .ex-outs { max-width: 152px; }
-.ex-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.ex-src { flex: none; }
-.ex-arrow { flex: none; align-self: center; width: 10px; height: 10px; border-top: 2px solid var(--muted); border-right: 2px solid var(--muted); transform: rotate(45deg); opacity: 0.6; }
-.ex-frame { position: relative; overflow: hidden; background: var(--pg-bg); border-radius: 3px; box-shadow: 0 0 0 1px var(--rule), 0 2px 6px rgba(16, 24, 40, 0.12); }
-.ex-clip { position: absolute; overflow: hidden; background: var(--pg-bg); }
-.ex-print .ex-outs .ex-frame { background: #fff; border-radius: 1px; }
-.ex-mini { width: 280px; transform-origin: 0 0; pointer-events: none; color: var(--pg-text); }
-.ex-mini *, .ex-mini *::after { animation: none !important; transition: none !important; }
-.nm-x.redacted { background: var(--ink); color: transparent; border-radius: 3px; }
-.ex-mark { position: absolute; left: -4px; right: -4px; height: 0; border-top: 1.5px dashed var(--cut); }
-.ex-n { font-size: 10px; line-height: 1; color: var(--muted); font-variant-numeric: tabular-nums; }
-.ex-pn { position: absolute; left: 0; right: 0; bottom: 1px; text-align: center; font-size: 5px; line-height: 1; color: #6b7280; }
-.ex-cap { margin: 8px 0 2px; font-weight: 600; }
+.ex-sim { margin-top: 10px; padding: 8px; border-radius: 12px; background: var(--bg); }
+.ex-art { display: block; width: 100%; height: auto; overflow: visible; }
+.ex-sheet { fill: var(--pg-bg); stroke: var(--rule); stroke-width: 1; }
+.ex-paper { fill: #fff; stroke: #d5d9e0; }
+.ex-line { fill: var(--pg-line-2); }
+.ex-ink { fill: var(--pg-text); opacity: 0.8; }
+.ex-pic { fill: var(--cut); opacity: 0.35; }
+.ex-cut { stroke: var(--cut); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.ex-scissors { fill: none; stroke: var(--cut); stroke-width: 1.4; stroke-linecap: round; }
+.ex-arrow { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ex-num { fill: var(--muted); font: 600 9px -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+.ex-pn { fill: #6b7280; font: 600 7px -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+.ex-cap { margin: 8px 0 0; font-weight: 600; }
 .ex-note { margin: 0; color: var(--muted); font-size: 12px; }
-.ex-measure { position: absolute; left: 0; top: 0; height: 0; overflow: hidden; visibility: hidden; }
-/* The page being cut: lines appear, then the pieces drop in. */
-.ex-anim .ex-mark { animation: ex-mark 0.3s ease-out both; animation-delay: calc(var(--i, 0) * 0.08s); }
-.ex-anim .ex-outs .ex-item { animation: ex-in 0.35s ease-out both; animation-delay: calc(0.3s + var(--i, 0) * 0.09s); }
-.ex-anim.ex-original .ex-frame { animation: ex-in 0.35s ease-out both; }
-@keyframes ex-mark { from { transform: scaleX(0); opacity: 0; } }
-@keyframes ex-in { from { transform: translateY(-8px) scale(0.96); opacity: 0; } }
+.ex-measure { position: absolute; left: 0; top: 0; width: 280px; visibility: hidden; pointer-events: none; }
+/* Cut lines draw in, then the pieces drop in. */
+.ex-anim .ex-cut, .ex-anim .ex-piece { transform-box: fill-box; transform-origin: 0 50%; }
+.ex-anim .ex-cut { animation: ex-cut 0.3s ease-out both; animation-delay: calc(var(--i, 0) * 0.1s); }
+.ex-anim .ex-scissors { animation: ex-fade 0.3s ease-out both; }
+.ex-anim .ex-piece { animation: ex-in 0.35s ease-out both; animation-delay: calc(0.3s + var(--i, 0) * 0.1s); }
+@keyframes ex-cut { from { transform: scaleX(0); } }
+@keyframes ex-fade { from { opacity: 0; } }
+@keyframes ex-in { from { transform: translateY(-6px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .ex-anim .ex-mark, .ex-anim .ex-outs .ex-item, .ex-anim.ex-original .ex-frame { animation: none; }
+  .ex-anim .ex-cut, .ex-anim .ex-scissors, .ex-anim .ex-piece { animation: none; }
 }
-/* Phones: a bottom sheet over the page. */
+/* Phones: the card opens above the Export button, over a lightly dimmed page. */
 @media (max-width: 639px) {
-  .ex-scrim { display: block; position: fixed; inset: 0; z-index: 40; background: rgba(0, 0, 0, 0.35); }
-  .ex-pop {
-    position: fixed; z-index: 41; top: auto; left: 0; right: 0; bottom: 0; width: auto; max-width: none;
-    max-height: 88vh; overflow-y: auto; overscroll-behavior: contain;
-    border-radius: 18px 18px 0 0; border-width: 1px 0 0; padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
-  }
+  .ex-scrim { display: block; position: fixed; inset: 0; z-index: 19; background: rgba(0, 0, 0, 0.12); }
+  .ex-pop { top: auto; bottom: calc(100% + 8px); width: 300px; }
 }
