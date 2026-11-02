@@ -17,15 +17,20 @@
   var btnReset = document.getElementById('btn-reset');
   var status = document.getElementById('status');
 
-  // The app's own controls on the phone screen. The ones that work here do what the buttons
-  // beside the phone do; the rest explain themselves with a popdown (data-say).
+  // The app's own controls on the device screen. The ones that work here do what the buttons
+  // beside it do; the rest explain themselves with a popdown (data-say).
+  var device = demo.querySelector('.device');
   var navBefore = document.getElementById('nav-before');
   var navAfter = document.getElementById('nav-after');
   var navUndo = document.getElementById('nav-undo');
   var navExport = document.getElementById('nav-export');
+  var sugChip = document.getElementById('sug-chip');
+  var chipText = document.getElementById('chip-text');
+  var chipChev = document.getElementById('chip-chev');
   var cleanup = document.getElementById('cleanup');
   var cuApply = document.getElementById('cu-apply');
   var cuCount = document.getElementById('cu-count');
+  var cuReview = document.getElementById('cu-review');
   var toolRedact = document.getElementById('tool-redact');
   var toolList = document.getElementById('tool-list');
   var listBadge = document.getElementById('list-badge');
@@ -38,6 +43,9 @@
   var motion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   function animated() { return !(motion && motion.matches); }
 
+  // iPhone or iPad: demo.css decides (--device), so the breakpoints live in one place.
+  function isIpad() { return getComputedStyle(demo).getPropertyValue('--device').trim() === 'ipad'; }
+
   function toArray(list) { return Array.prototype.slice.call(list); }
   function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
   // A mouse or trackpad clicks; a finger taps.
@@ -48,6 +56,7 @@
   status.textContent = words(status.textContent);
 
   var bands = toArray(page.querySelectorAll('.band[data-cut]'));
+  var allBands = toArray(page.querySelectorAll('.band'));
   var names = toArray(page.querySelectorAll('.nm'));
   var state = 'idle';   // idle | review | applied
   var view = 'after';   // after | before (once applied)
@@ -78,14 +87,11 @@
       chip.appendChild(tag);
     }
     chip.addEventListener('click', function () {
-      var on = chip.getAttribute('aria-pressed') !== 'true';
-      setOn(band, on);
-      if (state === 'applied') editApplied(band, on);
-      else reviewSummary();
-      syncApp();
+      toggleBand(band, chip.getAttribute('aria-pressed') !== 'true');
     });
     band._chip = chip;
     band._maybe = maybe;
+    band._edit = false;  // applied at some point: it's in the edit list, switched on or off
     band._t = 0;
     band.appendChild(chip);
     setOn(band, !maybe);
@@ -96,6 +102,14 @@
     band.classList.toggle('off', !on);
   }
   function isOn(band) { return band._chip.getAttribute('aria-pressed') === 'true'; }
+
+  // A suggestion switched on or off, from its label on the page or its row in the inspector.
+  function toggleBand(band, on) {
+    setOn(band, on);
+    if (state === 'applied') editApplied(band, on);
+    else reviewSummary();
+    syncApp();
+  }
 
   function reviewSummary() {
     var on = bands.filter(isOn).length;
@@ -152,24 +166,37 @@
     syncApp();
   }
 
-  // Everything on the phone screen that follows the demo's state.
+  // Suggestions not yet applied (the app's `pending`), and the edit list's length.
+  function pending() { return state === 'idle' ? [] : bands.filter(function (b) { return !b._edit; }); }
+  function editCount() { return bands.filter(function (b) { return b._edit; }).length + coveredCount(); }
+
+  // Everything on the device screen that follows the demo's state.
   function syncApp() {
     var on = bands.filter(isOn).length;
     cleanup.hidden = state !== 'review' || on === 0;
     cuCount.textContent = on;
     cuApply.setAttribute('aria-label', 'Clean Up, ' + plural(on, 'suggestion', 'suggestions'));
-    var edits = applied.length + coveredCount();
+    // SuggestionChip: Find Suggestions until they're found, then how many wait.
+    var waiting = pending().length;
+    var chipUp = state === 'idle' || waiting > 0;
+    sugChip.hidden = !chipUp;
+    demo.classList.toggle('chip-up', chipUp);
+    chipText.textContent = state === 'idle' ? 'Find Suggestions' : plural(waiting, 'suggestion', 'suggestions');
+    chipChev.hidden = state === 'idle';
+    var edits = editCount();
     listBadge.hidden = edits === 0;
     listBadge.textContent = edits;
     toolList.setAttribute('aria-label', edits ? 'List, ' + plural(edits, 'edit', 'edits') : 'List');
     navUndo.disabled = edits === 0;
     toolRedact.setAttribute('aria-pressed', redacting ? 'true' : 'false');
     redactRow.hidden = !redacting;
+    syncInspector();
   }
 
   // 1. Clean Up: show the suggestions. Nothing changes yet.
   btnClean.addEventListener('click', function () {
     if (state !== 'idle') return;
+    measure();
     state = 'review';
     demo.classList.add('reviewing');
     bands.forEach(function (b) { b._chip.hidden = false; });
@@ -177,6 +204,7 @@
     btnApply.disabled = false;
     btnApply.focus();
     scrollScreenTo(0);
+    showTab('sugs');
     var strong = bands.filter(function (b) { return !b._maybe; }).length;
     var maybe = bands.length - strong;
     var text = plural(bands.length, 'suggestion', 'suggestions') + ' found. ' + strong + ' ' + (strong === 1 ? 'is' : 'are') + ' on';
@@ -204,10 +232,12 @@
     bands.forEach(function (b) { b._chip.hidden = true; });
     var anim = animated();
     applied.forEach(function (b) {
+      b._edit = true;
       setCut(b, true, anim);
       b.setAttribute('aria-hidden', 'true');
     });
     btnApply.disabled = true;
+    showTab('edits');
     setCompare(true);
     btnBefore.focus();
     var pct = total > 0 ? Math.round(removed / total * 100) : 0;
@@ -246,13 +276,21 @@
     setCompare(true);
   }
 
-  // A label tapped in Before: add that suggestion to what's applied, or take it out.
+  // A suggestion added to what's applied, or taken out. In After (from the inspector) the page
+  // changes at once, as switching an edit off does in the app.
   function editApplied(band, on) {
     var i = applied.indexOf(band);
     if (on && i < 0) applied.push(band);
     if (!on && i >= 0) applied.splice(i, 1);
-    band.classList.toggle('was-cut', on);
-    say((on ? 'Added. ' : 'Skipped. ') + plural(applied.length, 'suggestion', 'suggestions') + ' will be applied. Tap After to see it.');
+    if (on) band._edit = true;
+    if (view === 'before') {
+      band.classList.toggle('was-cut', on);
+      say((on ? 'Added. ' : 'Skipped. ') + plural(applied.length, 'suggestion', 'suggestions') + ' will be applied. Tap After to see it.');
+    } else {
+      setCut(band, on, animated());
+      if (on) band.setAttribute('aria-hidden', 'true'); else band.removeAttribute('aria-hidden');
+      say((on ? 'Added. ' : 'Switched off. ') + plural(applied.length, 'suggestion', 'suggestions') + ' applied.');
+    }
   }
   btnBefore.addEventListener('click', function () { showView('before'); });
   btnAfter.addEventListener('click', function () { showView('after'); });
@@ -274,6 +312,7 @@
   }
 
   function setRedacted(n, on) {
+    if (on) n._rect = nameRect(n);
     n.classList.toggle('redacted', on);
     n.setAttribute('aria-pressed', on ? 'true' : 'false');
     if (on) n.setAttribute('aria-label', 'Redacted name');
@@ -311,12 +350,12 @@
     });
   });
 
-  // Status bar: time, signal and battery each answer with a short popdown.
-  var phone = demo.querySelector('.phone');
+  // Popdowns: the status bar, the app's controls the demo can't run, the ad and the sign-up box
+  // each answer with a short note.
   var pop = document.createElement('div');
   pop.className = 'sb-pop off';
   pop.setAttribute('role', 'status');
-  phone.appendChild(pop);
+  device.appendChild(pop);
   var popTimer = 0;
   function hidePop() { pop.classList.add('off'); }
   function showPop(text) {
@@ -325,7 +364,7 @@
     clearTimeout(popTimer);
     popTimer = setTimeout(hidePop, 2800);
   }
-  toArray(page.querySelectorAll('.sb-btn')).forEach(function (b) {
+  toArray(device.querySelectorAll('[data-say]')).forEach(function (b) {
     b.addEventListener('click', function (e) {
       e.stopPropagation();
       showPop(b.getAttribute('data-say'));
@@ -333,13 +372,7 @@
   });
   document.addEventListener('click', hidePop);
 
-  // The app's controls: the ones that work here press the matching button beside the phone.
-  toArray(phone.querySelectorAll('.app-nav [data-say], .cleanup [data-say], .tools [data-say]')).forEach(function (b) {
-    b.addEventListener('click', function (e) {
-      e.stopPropagation();
-      showPop(b.getAttribute('data-say'));
-    });
-  });
+  // The app's controls that work here press the matching button beside the device.
   function press(el, button) { el.addEventListener('click', function () { button.click(); }); }
   press(navBefore, btnBefore);
   press(navAfter, btnAfter);
@@ -347,12 +380,295 @@
   press(toolRedact, btnRedact);
   press(document.getElementById('redact-done'), btnRedact);
 
-  // The car ad's play button and the sign-up box answer like the status bar does.
-  toArray(page.querySelectorAll('.vid-play, .signup .go')).forEach(function (b) {
-    b.addEventListener('click', function (e) {
+  // The chip: Find Suggestions is step 1; afterwards it opens the suggestions (the inspector on
+  // iPad; a sheet on iPhone, which the demo doesn't draw).
+  var SHEET_NOTE = 'In the app, this opens the list of suggestions. Here, tap a label on the page.';
+  function openSuggestions(e) {
+    if (isIpad()) { openInspector('sugs'); return; }
+    e.stopPropagation();
+    showPop(SHEET_NOTE);
+  }
+  sugChip.addEventListener('click', function (e) {
+    if (state === 'idle') btnClean.click();
+    else openSuggestions(e);
+  });
+  cuReview.addEventListener('click', openSuggestions);
+
+  // List: on iPad it opens and closes the inspector on Edits, as EditorModel.toggleEditList does.
+  toolList.addEventListener('click', function (e) {
+    if (!isIpad()) {
       e.stopPropagation();
-      showPop(b.getAttribute('data-say'));
+      showPop('In the app: shows every edit.');
+      return;
+    }
+    if (inspectorOpen() && tab === 'edits') demo.classList.add('insp-closed');
+    else openInspector('edits');
+    syncApp();
+  });
+
+  // ---- The iPad inspector: Edits | Suggestions, kept in step with the page. ----
+  var inspector = document.getElementById('inspector');
+  var tabEdits = document.getElementById('tab-edits');
+  var tabSugs = document.getElementById('tab-sugs');
+  var paneEdits = document.getElementById('pane-edits');
+  var paneSugs = document.getElementById('pane-sugs');
+  var editsEmpty = document.getElementById('edits-empty');
+  var editsList = document.getElementById('edits-list');
+  var editsRows = document.getElementById('edits-rows');
+  var editsFoot = document.getElementById('edits-foot');
+  var presetBtn = document.getElementById('insp-preset');
+  var sugsIdle = document.getElementById('sugs-idle');
+  var sugsDone = document.getElementById('sugs-done');
+  var sugsList = document.getElementById('sugs-list');
+  var sugsSecs = document.getElementById('sugs-secs');
+  var sugsApply = document.getElementById('sugs-apply');
+  var apAll = document.getElementById('ap-all');
+  var apSel = document.getElementById('ap-sel');
+  var tab = 'edits';
+
+  // Original drawings in the spirit of the app's symbols.
+  var ICONS = {
+    sparkles: '<path class="dot" d="m10 3 1.9 5.1L17 10l-5.1 1.9L10 17l-1.9-5.1L3 10l5.1-1.9Zm8.5 10 .9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9Z"/>',
+    wifi: '<path d="M12 19.5h0M8.6 16a4.8 4.8 0 0 1 6.8 0M5.4 12.8a9.3 9.3 0 0 1 13.2 0M2.5 9.6a13.4 13.4 0 0 1 19 0"/>',
+    video: '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="m10 9.3 5 2.7-5 2.7Z"/>',
+    space: '<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M12 7v10m-2.5-7.5L12 7l2.5 2.5m-5 5L12 17l2.5-2.5"/>',
+    mail: '<rect x="3" y="5.5" width="18" height="13" rx="2.2"/><path d="m3.8 7 8.2 6.2L20.2 7"/>',
+    end: '<path d="M4 5h16M4 9.5h16M4 14h9"/><path d="M17 13v6m-3-3h6"/>',
+    cutRows: '<path d="M12 3v18M8 6.5 12 3l4 3.5M8 17.5l4 3.5 4-3.5"/>',
+    redact: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/><path d="m4 4 16 16"/>'
+  };
+  function icon(name, cls) {
+    var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    s.setAttribute('class', 'ic' + (cls ? ' ' + cls : ''));
+    s.setAttribute('viewBox', '0 0 24 24');
+    s.setAttribute('aria-hidden', 'true');
+    s.setAttribute('focusable', 'false');
+    s.innerHTML = ICONS[name];
+    return s;
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  // Suggestion categories, as SuggestionsSheet groups them (titles from Suggestion.Category, the
+  // detector names from SuggestionLabels.title(forDetector:)).
+  var CATS = {
+    statusBar: { title: 'Status Bar', icon: 'wifi', detector: 'System bar' },
+    video: { title: 'Videos', icon: 'video', detector: 'Inline video' },
+    emptyBand: { title: 'Empty Space', icon: 'space', detector: 'Empty space' },
+    newsletter: { title: 'Newsletter Sign-ups', icon: 'mail', detector: 'Newsletter sign-up' },
+    pageEnd: { title: 'End of Page', icon: 'end', detector: 'End of page' }
+  };
+
+  // Sizes in the inspector are in the screenshot's pixels: the page as captured on that device.
+  var CAPTURE_W = { phone: 1320, ipad: 1640 };
+  var measured = null;
+  function measure() {
+    var k = (isIpad() ? CAPTURE_W.ipad : CAPTURE_W.phone) / page.clientWidth;
+    var y = 0;
+    allBands.forEach(function (b) {
+      var h = b.offsetHeight;
+      b._y = Math.round(y * k);
+      b._h = Math.round(h * k);
+      y += h;
     });
+    measured = { k: k, w: Math.round(page.clientWidth * k), h: Math.round((y + 18) * k) };  // 18: the page's bottom padding
+  }
+  function nameRect(n) {
+    if (!measured) measure();
+    var band = n.closest('.band');
+    var b = band.getBoundingClientRect();
+    var r = n.getBoundingClientRect();
+    var p = page.getBoundingClientRect();
+    var k = measured.k;
+    return { x: Math.round((r.left - p.left) * k), y: band._y + Math.round((r.top - b.top) * k), w: Math.round(r.width * k), h: Math.round(r.height * k) };
+  }
+  function rows(b) { return b._h + ' px · rows ' + b._y + ' to ' + (b._y + b._h - 1); }
+
+  function makeSwitch(label, onClick, cls) {
+    var sw = el('button', 'sw' + (cls ? ' ' + cls : ''));
+    sw.type = 'button';
+    sw.setAttribute('role', 'switch');
+    sw.setAttribute('aria-label', label);
+    sw.addEventListener('click', function (e) { e.stopPropagation(); onClick(sw.getAttribute('aria-checked') !== 'true'); });
+    return sw;
+  }
+
+  // Selecting a row shows that part of the page, in Before, as the app does.
+  function reveal(target) {
+    if (state === 'applied' && view === 'after' && target.classList.contains('cut')) showView('before');
+    var go = function () {
+      var y = target.getBoundingClientRect().top - page.getBoundingClientRect().top;
+      scrollScreenTo(Math.max(0, y + page.offsetTop - 50));
+    };
+    if (animated()) window.setTimeout(go, DUR); else go();
+  }
+
+  function row(iconName, iconCls, onReveal) {
+    var r = el('div', 'ig-row');
+    var main = el('button', 'ig-main');
+    main.type = 'button';
+    var ic = el('span', 'ig-ic' + (iconCls ? ' ' + iconCls : ''));
+    ic.appendChild(icon(iconName));
+    var txt = el('span', 'ig-txt');
+    main.appendChild(ic);
+    main.appendChild(txt);
+    main.addEventListener('click', onReveal);
+    r.appendChild(main);
+    return { row: r, txt: txt };
+  }
+
+  // One suggestions row and one edits row per band, plus an edits row per name; syncInspector
+  // shows the ones that apply.
+  var sections = {};
+  bands.forEach(function (band) {
+    var cat = CATS[band.getAttribute('data-cat')];
+    var key = band.getAttribute('data-cat');
+    if (!sections[key]) {
+      var sec = el('div', 'ig-sec');
+      var head = el('h4', 'ig-head');
+      head.appendChild(icon(cat.icon));
+      head.appendChild(document.createTextNode(cat.title));
+      sec.appendChild(head);
+      sec._group = el('div', 'ig-group');
+      sec.appendChild(sec._group);
+      sugsSecs.appendChild(sec);
+      sections[key] = sec;
+    }
+    var label = band.getAttribute('data-cut');
+    var s = row(cat.icon, '', function () { reveal(band); });
+    s.txt.appendChild(el('span', 'ig-title', label));
+    band._sSub = s.txt.appendChild(el('span', 'ig-sub'));
+    var meta = s.txt.appendChild(el('span', 'ig-meta'));
+    meta.appendChild(el('span', 'badge-s' + (band._maybe ? ' maybe' : ''), band._maybe ? 'Maybe' : 'Strong'));
+    meta.appendChild(document.createTextNode(cat.detector));
+    band._sSw = s.row.appendChild(makeSwitch('Include ' + label, function (on) { toggleBand(band, on); }, 'sug'));
+    band._sRow = s.row;
+    band._sec = sections[key];
+    sections[key]._group.appendChild(s.row);
+
+    var e = row('cutRows', 'cut', function () { reveal(band); });
+    e.txt.appendChild(el('span', 'ig-title', 'Cut Rows'));
+    band._eSub = e.txt.appendChild(el('span', 'ig-sub'));
+    var origin = e.txt.appendChild(el('span', 'ig-meta ig-origin'));
+    origin.appendChild(icon('sparkles'));
+    origin.appendChild(document.createTextNode(label + ' · 2 px line join · ' + (band._maybe ? 'Maybe' : 'Strong')));
+    band._eSw = e.row.appendChild(makeSwitch('Enable Cut Rows, ' + label, function (on) { toggleBand(band, on); }));
+    band._eRow = e.row;
+    editsRows.appendChild(e.row);
+  });
+  names.forEach(function (n) {
+    var e = row('redact', 'red', function () { reveal(n); });
+    e.txt.appendChild(el('span', 'ig-title', 'Redaction'));
+    n._eSub = e.txt.appendChild(el('span', 'ig-sub'));
+    n._eMeta = e.txt.appendChild(el('span', 'ig-meta ig-origin'));
+    var sw = e.row.appendChild(makeSwitch('Enable Redaction', function () {}));
+    sw.setAttribute('aria-checked', 'true');
+    sw.disabled = true;  // the demo keeps redactions on; Redact again to take one off
+    n._eRow = e.row;
+    editsRows.appendChild(e.row);
+  });
+
+  function inspectorOpen() { return !demo.classList.contains('insp-closed'); }
+  function showTab(next) {
+    tab = next;
+    tabEdits.setAttribute('aria-pressed', next === 'edits' ? 'true' : 'false');
+    tabSugs.setAttribute('aria-pressed', next === 'sugs' ? 'true' : 'false');
+    paneEdits.hidden = next !== 'edits';
+    paneSugs.hidden = next !== 'sugs';
+  }
+  function openInspector(next) {
+    demo.classList.remove('insp-closed');
+    showTab(next);
+    syncApp();
+  }
+  tabEdits.addEventListener('click', function () { showTab('edits'); syncApp(); });
+  tabSugs.addEventListener('click', function () { showTab('sugs'); syncApp(); });
+  document.getElementById('sugs-find').addEventListener('click', function () { btnClean.click(); });
+  apSel.addEventListener('click', function () { btnApply.click(); });
+  apAll.addEventListener('click', function () {
+    bands.forEach(function (b) { setOn(b, true); });
+    btnApply.click();
+  });
+
+  function syncInspector() {
+    if (!inspector) return;
+    var ipad = isIpad();
+    toolList.setAttribute('aria-pressed', ipad && inspectorOpen() && tab === 'edits' ? 'true' : 'false');
+    if (!ipad) return;
+    if (state !== 'idle' && !measured) measure();
+    var waiting = pending();
+    tabSugs.textContent = waiting.length ? 'Suggestions (' + waiting.length + ')' : 'Suggestions';
+
+    // Suggestions
+    sugsIdle.hidden = state !== 'idle';
+    sugsDone.hidden = state === 'idle' || waiting.length > 0;
+    sugsList.hidden = state === 'idle' || waiting.length === 0;
+    bands.forEach(function (b) {
+      var show = waiting.indexOf(b) >= 0;
+      b._sRow.hidden = !show;
+      b._sRow.classList.toggle('off', !isOn(b));
+      b._sSw.setAttribute('aria-checked', isOn(b) ? 'true' : 'false');
+      if (show && measured) b._sSub.textContent = rows(b);
+    });
+    Object.keys(sections).forEach(function (k) {
+      sections[k].hidden = !bands.some(function (b) { return b._sec === sections[k] && !b._sRow.hidden; });
+    });
+    var on = bands.filter(isOn).length;
+    sugsApply.hidden = state !== 'review';
+    apSel.textContent = on ? 'Apply ' + on : 'Apply';
+    apSel.disabled = on === 0;
+
+    // Edits, in page order
+    var any = false;
+    var removed = 0;
+    bands.forEach(function (b) {
+      b._eRow.hidden = !b._edit;
+      if (!b._edit) return;
+      any = true;
+      var enabled = applied.indexOf(b) >= 0;
+      if (enabled) removed += b._h;
+      b._eRow.classList.toggle('off', !enabled);
+      b._eSw.setAttribute('aria-checked', enabled ? 'true' : 'false');
+      b._eSub.textContent = rows(b);
+    });
+    names.forEach(function (n) {
+      var on = n.classList.contains('redacted');
+      n._eRow.hidden = !on;
+      if (!on) return;
+      any = true;
+      var r = n._rect;
+      n._eSub.textContent = 'Solid black · ' + r.w + '×' + r.h + ' px';
+      n._eMeta.textContent = 'Manual · at ' + r.x + ', ' + r.y;
+    });
+    editsEmpty.hidden = any;
+    editsList.hidden = !any;
+    presetBtn.disabled = !any || (applied.length === 0 && coveredCount() === 0);
+    if (any && measured) {
+      editsFoot.textContent = 'Output ' + measured.w + ' × ' + (measured.h - removed) + ' px · original ' + measured.w + ' × ' + measured.h + ' px';
+    }
+  }
+
+  // Edit rows follow the page: a redaction's row goes after its band's cut row.
+  names.forEach(function (n) {
+    var band = n.closest('.band');
+    var next = null;
+    for (var i = allBands.indexOf(band) + 1; i < allBands.length && !next; i++) if (allBands[i]._eRow) next = allBands[i]._eRow;
+    if (next) editsRows.insertBefore(n._eRow, next);
+  });
+
+  // Rotating an iPad or resizing a window can switch devices: lay the inspector out again, and
+  // measure again while nothing is cut.
+  var lastIpad = isIpad();
+  window.addEventListener('resize', function () {
+    var now = isIpad();
+    if (now === lastIpad) return;
+    lastIpad = now;
+    if (state !== 'applied') measured = null;
+    syncApp();
   });
 
   // 5. Export: three of the app's presets as cartoons. The cut count comes from the real page
@@ -550,8 +866,11 @@
       b.style.height = '';
       b.removeAttribute('aria-hidden');
       b._chip.hidden = true;
+      b._edit = false;
       setOn(b, !b._maybe);
     });
+    measured = null;
+    showTab('edits');
     names.forEach(function (n) { setRedacted(n, false); });
     setRedacting(false);
     btnClean.disabled = false;

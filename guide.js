@@ -10,7 +10,7 @@
 
   var demo = document.getElementById('demo');
   var screen = document.getElementById('screen');
-  var phone = demo && demo.querySelector('.phone');
+  var phone = demo && demo.querySelector('.device');
   if (!demo || !screen || !phone) return;
 
   var btnClean = document.getElementById('btn-clean');

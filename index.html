@@ -35,11 +35,16 @@
   <section class="section demo" id="demo" aria-labelledby="demo-title">
     <h2 id="demo-title" class="vh">Try it: clean up a sample page, compare, then hide a name</h2>
     <div class="demo-grid">
-      <div class="phone">
+      <!-- The device: an iPhone, or an iPad at tablet widths (demo.css sets --device). Inside is the
+           app's editor: EditorView, EditorToolbar and, on iPad, the EditorInspector column. -->
+      <div class="device">
         <div class="app">
-          <div class="app-status" aria-hidden="true"><span>9:41</span><span class="sb-icons"><span class="sb-sig"></span><span class="sb-bat"></span></span></div>
+          <div class="app-status" aria-hidden="true"><span>9:41<span class="on-ipad"> Mon Nov 2</span></span><span class="sb-icons"><span class="sb-sig on-phone"></span><svg class="sb-wifi" viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0Z"/><path d="M3.6 7a6.2 6.2 0 0 1 8.8 0l-1.3 1.3a4.4 4.4 0 0 0-6.2 0Z"/><path d="M1.4 4.8a9.3 9.3 0 0 1 13.2 0l-1.3 1.3a7.5 7.5 0 0 0-10.6 0Z"/></svg><span class="on-ipad sb-pct">100%</span><span class="sb-bat"></span></span></div>
           <div class="app-nav" role="group" aria-label="Editor top bar">
-            <button type="button" class="nav-btn nav-back" aria-label="Back" data-say="In the app, this goes back to your projects."><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <span class="nav-start">
+              <button type="button" class="nav-btn nav-back" aria-label="Back" data-say="In the app, this goes back to your projects."><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7"/></svg></button>
+              <button type="button" class="nav-title on-ipad" data-say="In the app, tap the name to rename the project. Your work is saved as you go."><strong>Riverside park</strong><small><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.7 2.7L16.2 9"/></svg>Saved</small></button>
+            </span>
             <div class="nav-seg" role="group" aria-label="Preview">
               <button type="button" id="nav-before" aria-pressed="true" disabled>Before</button>
               <button type="button" id="nav-after" aria-pressed="false" disabled>After</button>
@@ -50,99 +55,135 @@
               <button type="button" class="nav-export" id="nav-export" aria-haspopup="dialog" aria-expanded="false" aria-controls="ex-pop">Export</button>
             </span>
           </div>
-          <div class="canvas">
-        <div class="screen" id="screen" tabindex="0" role="region" aria-label="Sample page capture, scrollable">
-          <div class="pg" id="page">
-            <div class="band band-sbar" data-cut="Status bar" data-strength="strong">
-              <div class="sbar"><button type="button" class="sb-btn sb-time" data-say="It’s always 9:41 in a screenshot.">9:41</button><span class="sb-icons"><button type="button" class="sb-btn" aria-label="Signal" data-say="No signal needed. itSeams works entirely on your iPhone."><span class="sb-sig"></span></button><button type="button" class="sb-btn" aria-label="Battery" data-say="Always 100% in a screenshot. Clean Up cuts this bar anyway."><span class="sb-bat"></span></button></span></div>
-            </div>
-            <div class="band">
-              <div class="site" aria-hidden="true"><span class="logo"><i></i><b></b></span></div>
-            </div>
-            <div class="band">
-              <div class="pad">
-                <p class="kicker">Local</p>
-                <p class="hl">Local council approves new riverside park</p>
-                <p class="byline">By Dana Whitfield · 4 min read</p>
-              </div>
-            </div>
-            <div class="band">
-              <div class="photo"><img src="/img/park-opening.jpg" width="960" height="450" alt="Paper cut-out picture: the mayor, a woman with a gold chain of office, and a young helper cut a red ribbon at Riverside Park; a crowd watches, one child holding a red balloon, with a lake and a hill behind."></div>
-              <p class="cap">The mayor cuts the ribbon to launch the riverside park plan.</p>
-            </div>
-            <div class="band">
-              <div class="pad txt">
-                <p>Plans for a park along the river were approved on Tuesday. Councillor <button type="button" class="nm">Theo Marsh</button> said work could start in the spring.</p>
-                <div class="lines" aria-hidden="true"><span class="ln w100"></span><span class="ln w94"></span><span class="ln w60"></span></div>
-              </div>
-            </div>
-            <div class="band" data-cut="Inline video" data-strength="strong">
-              <div class="ad vid">
-                <small>Sponsored</small>
-                <div class="vid-frame">
-                  <svg class="vid-scene" role="img" aria-label="Sponsored video: a red car on a country road" viewBox="0 0 240 120" preserveAspectRatio="xMidYMid slice">
-                    <rect width="240" height="120" class="vs-sky"/>
-                    <path d="M0 78 L60 56 L110 70 L170 48 L240 66 L240 120 L0 120 Z" class="vs-hill"/>
-                    <rect y="88" width="240" height="32" class="vs-road"/>
-                    <g class="vs-dash"><rect x="0" y="103" width="16" height="2"/><rect x="40" y="103" width="16" height="2"/><rect x="80" y="103" width="16" height="2"/><rect x="120" y="103" width="16" height="2"/><rect x="160" y="103" width="16" height="2"/><rect x="200" y="103" width="16" height="2"/><rect x="240" y="103" width="16" height="2"/></g>
-                    <g class="vs-car" transform="translate(70 66)">
-                      <path d="M4 26 C4 20 8 18 14 17 L30 15 L42 6 C46 3 50 2 56 2 L78 2 C84 2 88 4 92 8 L100 16 L112 18 C118 19 120 22 120 26 L120 30 L4 30 Z" class="vs-body"/>
-                      <path d="M46 8 L56 5 L74 5 L74 15 L38 15 Z M78 5 L84 5 C87 5 89 6 91 9 L96 15 L78 15 Z" class="vs-glass"/>
-                      <circle cx="30" cy="30" r="9" class="vs-tyre"/><circle cx="30" cy="30" r="4" class="vs-hub"/>
-                      <circle cx="96" cy="30" r="9" class="vs-tyre"/><circle cx="96" cy="30" r="4" class="vs-hub"/>
-                    </g>
-                  </svg>
-                  <button type="button" class="vid-play" aria-label="Play" data-say="It’s an ad. Clean Up can cut it for you."></button>
-                  <span class="vid-bar" aria-hidden="true"><i></i></span>
-                  <span class="vid-time" aria-hidden="true">0:15</span>
+          <div class="app-body">
+            <div class="app-main">
+              <div class="canvas">
+                <div class="screen" id="screen" tabindex="0" role="region" aria-label="Sample page capture, scrollable">
+                  <div class="pg" id="page">
+                    <div class="band band-sbar" data-cut="Status bar" data-cat="statusBar" data-strength="strong">
+                      <div class="sbar"><span><button type="button" class="sb-btn sb-time" data-say="It’s always 9:41 in a screenshot.">9:41</button><span class="on-ipad"> Mon Nov 2</span></span><span class="sb-icons"><button type="button" class="sb-btn" aria-label="Signal" data-say="No signal needed. itSeams works entirely on your device."><span class="sb-sig on-phone"></span><svg class="sb-wifi on-ipad" viewBox="0 0 16 12" aria-hidden="true"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0Z"/><path d="M3.6 7a6.2 6.2 0 0 1 8.8 0l-1.3 1.3a4.4 4.4 0 0 0-6.2 0Z"/><path d="M1.4 4.8a9.3 9.3 0 0 1 13.2 0l-1.3 1.3a7.5 7.5 0 0 0-10.6 0Z"/></svg></button><button type="button" class="sb-btn" aria-label="Battery" data-say="Always 100% in a screenshot. Clean Up cuts this bar anyway."><span class="sb-bat"></span></button></span></div>
+                    </div>
+                    <div class="band">
+                      <div class="site" aria-hidden="true"><span class="logo"><i></i><b></b></span><span class="site-nav on-ipad"><b></b><b></b><b></b></span></div>
+                    </div>
+                    <div class="band">
+                      <div class="pad">
+                        <p class="kicker">Local</p>
+                        <p class="hl">Local council approves new riverside park</p>
+                        <p class="byline">By Dana Whitfield · 4 min read</p>
+                      </div>
+                    </div>
+                    <div class="band">
+                      <div class="photo"><img src="/img/park-opening.jpg" width="960" height="450" alt="Paper cut-out picture: the mayor, a woman with a gold chain of office, and a young helper cut a red ribbon at Riverside Park; a crowd watches, one child holding a red balloon, with a lake and a hill behind."></div>
+                      <p class="cap">The mayor cuts the ribbon to launch the riverside park plan.</p>
+                    </div>
+                    <div class="band">
+                      <div class="pad txt">
+                        <p>Plans for a park along the river were approved on Tuesday. Councillor <button type="button" class="nm">Theo Marsh</button> said work could start in the spring.</p>
+                        <div class="lines" aria-hidden="true"><span class="ln w100"></span><span class="ln w94"></span><span class="ln w60"></span></div>
+                      </div>
+                    </div>
+                    <div class="band" data-cut="Inline video" data-cat="video" data-strength="strong">
+                      <div class="ad vid">
+                        <small>Sponsored</small>
+                        <div class="vid-frame">
+                          <svg class="vid-scene" role="img" aria-label="Sponsored video: a red car on a country road" viewBox="0 0 240 120" preserveAspectRatio="xMidYMid slice">
+                            <rect width="240" height="120" class="vs-sky"/>
+                            <path d="M0 78 L60 56 L110 70 L170 48 L240 66 L240 120 L0 120 Z" class="vs-hill"/>
+                            <rect y="88" width="240" height="32" class="vs-road"/>
+                            <g class="vs-dash"><rect x="0" y="103" width="16" height="2"/><rect x="40" y="103" width="16" height="2"/><rect x="80" y="103" width="16" height="2"/><rect x="120" y="103" width="16" height="2"/><rect x="160" y="103" width="16" height="2"/><rect x="200" y="103" width="16" height="2"/><rect x="240" y="103" width="16" height="2"/></g>
+                            <g class="vs-car" transform="translate(70 66)">
+                              <path d="M4 26 C4 20 8 18 14 17 L30 15 L42 6 C46 3 50 2 56 2 L78 2 C84 2 88 4 92 8 L100 16 L112 18 C118 19 120 22 120 26 L120 30 L4 30 Z" class="vs-body"/>
+                              <path d="M46 8 L56 5 L74 5 L74 15 L38 15 Z M78 5 L84 5 C87 5 89 6 91 9 L96 15 L78 15 Z" class="vs-glass"/>
+                              <circle cx="30" cy="30" r="9" class="vs-tyre"/><circle cx="30" cy="30" r="4" class="vs-hub"/>
+                              <circle cx="96" cy="30" r="9" class="vs-tyre"/><circle cx="96" cy="30" r="4" class="vs-hub"/>
+                            </g>
+                          </svg>
+                          <button type="button" class="vid-play" aria-label="Play" data-say="It’s an ad. Clean Up can cut it for you."></button>
+                          <span class="vid-bar" aria-hidden="true"><i></i></span>
+                          <span class="vid-time" aria-hidden="true">0:15</span>
+                        </div>
+                        <p class="vid-cta"><span>Test drive the all-new sedan</span><b>Learn more</b></p>
+                      </div>
+                    </div>
+                    <div class="band">
+                      <div class="pad lines" aria-hidden="true"><span class="ln w100"></span><span class="ln w88"></span><span class="ln w94"></span><span class="ln w45"></span></div>
+                    </div>
+                    <div class="band gap" data-cut="Empty space" data-cat="emptyBand" data-strength="strong"></div>
+                    <div class="band">
+                      <div class="pad txt">
+                        <p>“It’s a place for everyone,” said <button type="button" class="nm">Ines Calder</button>, who lives nearby.</p>
+                        <div class="lines" aria-hidden="true"><span class="ln w94"></span><span class="ln w100"></span><span class="ln w72"></span></div>
+                      </div>
+                    </div>
+                    <div class="band" data-cut="Newsletter sign-up" data-cat="newsletter" data-strength="maybe">
+                      <div class="signup">
+                        <strong>Subscribe to our newsletter</strong>
+                        <p>The week’s local news, every Friday.</p>
+                        <div class="row"><span class="field" aria-hidden="true">Email address</span><button type="button" class="go" data-say="Boxes like this are what Clean Up suggests cutting.">Sign up</button></div>
+                      </div>
+                    </div>
+                    <div class="band" data-cut="End of page" data-cat="pageEnd" data-strength="strong">
+                      <div class="related">
+                        <strong>Related</strong>
+                        <div class="rel" aria-hidden="true"><i></i><span><span class="ln w94"></span><span class="ln w60"></span></span></div>
+                        <div class="rel" aria-hidden="true"><i></i><span><span class="ln w88"></span><span class="ln w45"></span></span></div>
+                        <div class="rel" aria-hidden="true"><i></i><span><span class="ln w100"></span><span class="ln w72"></span></span></div>
+                      </div>
+                      <div class="foot" aria-hidden="true"><span class="ln w45"></span><span class="ln w60"></span></div>
+                    </div>
+                  </div>
                 </div>
-                <p class="vid-cta"><span>Test drive the all-new sedan</span><b>Learn more</b></p>
+                <!-- SuggestionChip: over the top of the canvas; the page starts below it. -->
+                <button type="button" class="sug-chip" id="sug-chip"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="dot" d="m10 3 1.9 5.1L17 10l-5.1 1.9L10 17l-1.9-5.1L3 10l5.1-1.9Zm8.5 10 .9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9Z"/></svg><span id="chip-text">Find Suggestions</span><svg class="ic chev" id="chip-chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false" hidden><path d="m9.5 6 6 6-6 6"/></svg></button>
+                <!-- CleanUpBar: over the bottom of the canvas. -->
+                <div class="cleanup" id="cleanup" hidden>
+                  <button type="button" class="cu-main" id="cu-apply"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="dot" d="m10 3 1.9 5.1L17 10l-5.1 1.9L10 17l-1.9-5.1L3 10l5.1-1.9Zm8.5 10 .9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9Z"/></svg>Clean Up · <span id="cu-count">0</span></button>
+                  <button type="button" class="cu-review" id="cu-review">Review</button>
+                </div>
+              </div>
+              <!-- EditorToolbar: an options row while a tool is on, then the tools. -->
+              <div class="app-bar">
+                <div class="redact-row" id="redact-row" hidden>
+                  <div class="rr-head"><strong>New Redactions</strong><button type="button" id="redact-done">Done</button></div>
+                  <div class="rr-tiles" role="group" aria-label="Redaction style">
+                    <button type="button" class="rr-tile" aria-pressed="true"><span class="rr-g rr-black"></span>Black</button>
+                    <button type="button" class="rr-tile" aria-pressed="false" data-say="In the app: covers with a white box."><span class="rr-g rr-white"></span>White</button>
+                    <button type="button" class="rr-tile" aria-pressed="false" data-say="In the app: pixelates in small blocks."><span class="rr-g rr-pix"></span>Pixelate 16</button>
+                    <button type="button" class="rr-tile" aria-pressed="false" data-say="In the app: pixelates in large blocks."><span class="rr-g rr-pix rr-pix-l"></span>Pixelate 32</button>
+                    <button type="button" class="rr-tile" aria-pressed="false" data-say="In the app: blurs what’s under the box."><span class="rr-g rr-blur"></span>Blur</button>
+                  </div>
+                  <p class="rr-note"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg>Every style is permanent in the exported image.</p>
+                </div>
+                <div class="tools" role="group" aria-label="Editor tools">
+                  <button type="button" class="tool" id="tool-cut" data-say="In the app: drag across the image to remove a band."><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6" cy="6.5" r="3"/><circle cx="6" cy="17.5" r="3"/><path d="M8.4 8.3 20.5 18.5M8.4 15.7 20.5 5.5"/></svg></span><span class="tool-t">Cut</span></button>
+                  <button type="button" class="tool" id="tool-insert" data-say="In the app: tap to add space; drag to set its size."><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.5 4H18a2.5 2.5 0 0 1 2.5 2.5V15"/><rect x="3.5" y="8" width="13.5" height="12" rx="2.2"/><path d="M10.2 11v6M7.2 14h6"/></svg></span><span class="tool-t">Insert</span></button>
+                  <button type="button" class="tool" id="tool-redact" aria-pressed="false"><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/><path d="m4 4 16 16"/></svg></span><span class="tool-t">Redact</span></button>
+                  <button type="button" class="tool" id="tool-join" data-say="In the app: sets the join for new cuts."><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 19 19 5"/></svg></span><span class="tool-t">Join</span></button>
+                  <button type="button" class="tool" id="tool-list" aria-pressed="false"><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6H20.5M9.5 12H20.5M9.5 18H20.5"/><circle class="dot" cx="4.8" cy="6" r="1.3"/><circle class="dot" cx="4.8" cy="12" r="1.3"/><circle class="dot" cx="4.8" cy="18" r="1.3"/></svg><span class="tool-badge" id="list-badge" hidden>0</span></span><span class="tool-t">List</span></button>
+                  <button type="button" class="tool" id="tool-markup" data-say="In the app: draw arrows, shapes, highlights and labels on the result before exporting."><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.5"/><path d="m12 5.5 3.2 7.5v5.6H8.8V13Zm-3.2 7.5h6.4"/></svg></span><span class="tool-t">Markup</span></button>
+                </div>
+                <div class="home-ind on-phone" aria-hidden="true"></div>
               </div>
             </div>
-            <div class="band">
-              <div class="pad lines" aria-hidden="true"><span class="ln w100"></span><span class="ln w88"></span><span class="ln w94"></span><span class="ln w45"></span></div>
-            </div>
-            <div class="band gap" data-cut="Empty space" data-strength="strong"></div>
-            <div class="band">
-              <div class="pad txt">
-                <p>“It’s a place for everyone,” said <button type="button" class="nm">Ines Calder</button>, who lives nearby.</p>
-                <div class="lines" aria-hidden="true"><span class="ln w94"></span><span class="ln w100"></span><span class="ln w72"></span></div>
+            <!-- EditorInspector (iPad only): Edits | Suggestions beside the canvas. demo.js fills the lists. -->
+            <aside class="inspector" id="inspector" aria-label="Inspector">
+              <div class="insp-seg" role="group" aria-label="Panel">
+                <button type="button" id="tab-edits" aria-pressed="true">Edits</button>
+                <button type="button" id="tab-sugs" aria-pressed="false">Suggestions</button>
               </div>
-            </div>
-            <div class="band" data-cut="Sign-up" data-strength="maybe">
-              <div class="signup">
-                <strong>Subscribe to our newsletter</strong>
-                <p>The week’s local news, every Friday.</p>
-                <div class="row"><span class="field" aria-hidden="true">Email address</span><button type="button" class="go" data-say="Boxes like this are what Clean Up suggests cutting.">Sign up</button></div>
+              <div class="insp-pane" id="pane-edits">
+                <div class="insp-tools"><button type="button" class="insp-link" id="insp-preset" data-say="In the app: saves these edits to use on other screenshots like this one." disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="7.5" y="3.5" width="13" height="13" rx="2.5"/><path d="M4.5 8v10a2.5 2.5 0 0 0 2.5 2.5h10M14 6.5v6.5m-2.8-2.8L14 13l2.8-2.8"/></svg>Save as Preset…</button></div>
+                <div class="insp-empty" id="edits-empty"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6" cy="6.5" r="3"/><circle cx="6" cy="17.5" r="3"/><path d="M8.4 8.3 20.5 18.5M8.4 15.7 20.5 5.5"/></svg><strong>No Edits Yet</strong><span>Choose Cut, then drag across the image.</span></div>
+                <div class="insp-list" id="edits-list" hidden><div class="ig-group" id="edits-rows"></div><p class="ig-foot" id="edits-foot"></p></div>
               </div>
-            </div>
-            <div class="band" data-cut="End of page" data-strength="strong">
-              <div class="related">
-                <strong>Related</strong>
-                <div class="rel" aria-hidden="true"><i></i><span><span class="ln w94"></span><span class="ln w60"></span></span></div>
-                <div class="rel" aria-hidden="true"><i></i><span><span class="ln w88"></span><span class="ln w45"></span></span></div>
-                <div class="rel" aria-hidden="true"><i></i><span><span class="ln w100"></span><span class="ln w72"></span></span></div>
+              <div class="insp-pane" id="pane-sugs" hidden>
+                <div class="insp-empty" id="sugs-idle"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="dot" d="m10 3 1.9 5.1L17 10l-5.1 1.9L10 17l-1.9-5.1L3 10l5.1-1.9Zm8.5 10 .9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9Z"/></svg><strong>No Suggestions Yet</strong><button type="button" class="insp-link" id="sugs-find">Find Suggestions</button></div>
+                <div class="insp-empty" id="sugs-done" hidden><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.7 2.7L16.2 9"/></svg><strong>All Suggestions Applied</strong><span>They’re in the edit list now. Undo to bring them back.</span></div>
+                <div class="insp-list" id="sugs-list" hidden><div id="sugs-secs"></div><p class="ig-foot">Nothing changes until you apply. Applied suggestions become normal edits you can change or undo.</p></div>
+                <div class="insp-apply" id="sugs-apply" hidden><button type="button" class="ap-all" id="ap-all">Apply All</button><button type="button" class="ap-sel" id="ap-sel">Apply</button></div>
               </div>
-              <div class="foot" aria-hidden="true"><span class="ln w45"></span><span class="ln w60"></span></div>
-            </div>
-          </div>
-        </div>
-            <div class="cleanup" id="cleanup" hidden>
-              <button type="button" class="cu-main" id="cu-apply"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="dot" d="m10 3 1.9 5.1L17 10l-5.1 1.9L10 17l-1.9-5.1L3 10l5.1-1.9Zm8.5 10 .9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9Z"/></svg>Clean Up · <span id="cu-count">0</span></button>
-              <button type="button" class="cu-review" data-say="In the app, Review opens the full list. Here, tap a label on the page.">Review</button>
-            </div>
-          </div>
-          <div class="app-bar">
-            <div class="redact-row" id="redact-row" hidden><strong>New Redactions</strong><button type="button" id="redact-done">Done</button></div>
-            <div class="tools" role="group" aria-label="Editor tools">
-              <button type="button" class="tool" id="tool-cut" data-say="In the app: drag across the image to remove a band."><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6" cy="6.5" r="3"/><circle cx="6" cy="17.5" r="3"/><path d="M8.4 8.3 20.5 18.5M8.4 15.7 20.5 5.5"/></svg></span><span class="tool-t">Cut</span></button>
-              <button type="button" class="tool" id="tool-insert" data-say="In the app: tap to add space; drag to set its size."><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.5 4H18a2.5 2.5 0 0 1 2.5 2.5V15"/><rect x="3.5" y="8" width="13.5" height="12" rx="2.2"/><path d="M10.2 11v6M7.2 14h6"/></svg></span><span class="tool-t">Insert</span></button>
-              <button type="button" class="tool" id="tool-redact" aria-pressed="false"><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/><path d="m4 4 16 16"/></svg></span><span class="tool-t">Redact</span></button>
-              <button type="button" class="tool" id="tool-join" data-say="In the app: sets the join for new cuts."><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 19 19 5"/></svg></span><span class="tool-t">Join</span></button>
-              <button type="button" class="tool" id="tool-list" data-say="In the app: shows every edit."><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6H20.5M9.5 12H20.5M9.5 18H20.5"/><circle class="dot" cx="4.8" cy="6" r="1.3"/><circle class="dot" cx="4.8" cy="12" r="1.3"/><circle class="dot" cx="4.8" cy="18" r="1.3"/></svg><span class="tool-badge" id="list-badge" hidden>0</span></span><span class="tool-t">List</span></button>
-              <button type="button" class="tool" id="tool-markup" data-say="In the app: draw arrows, shapes, highlights and labels on the result before exporting."><span class="tool-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.5"/><path d="m12 5.5 3.2 7.5v5.6H8.8V13Zm-3.2 7.5h6.4"/></svg></span><span class="tool-t">Markup</span></button>
-            </div>
-            <div class="home-ind" aria-hidden="true"></div>
+            </aside>
           </div>
         </div>
       </div>

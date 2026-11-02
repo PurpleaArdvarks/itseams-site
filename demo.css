@@ -1,4 +1,4 @@
-/* Interactive demo: a mock web page capture inside a phone frame. */
+/* Interactive demo: a mock web page capture in the app's editor, inside an iPhone or iPad frame. */
 .demo {
   --pg-bg: #ffffff;
   --pg-text: #1d2027;
@@ -24,6 +24,15 @@
   --badge: #0066d9;
   --sug: #8f3ac2;
   --sug-soft: rgba(143, 58, 194, 0.12);
+  --sug-text: #8f3ac2;
+  --canvas: #f2f2f7;      /* secondarySystemBackground */
+  --chip-bg: rgba(255, 255, 255, 0.92);
+  --fill-3: rgba(118, 118, 128, 0.12);
+  --grp-bg: #f2f2f7;      /* inset grouped list */
+  --grp-row: #ffffff;
+  --sep: rgba(60, 60, 67, 0.18);
+  --switch-on: #34c759;
+  --switch-off: rgba(120, 120, 128, 0.2);
 }
 @media (prefers-color-scheme: dark) {
   .demo {
@@ -47,6 +56,15 @@
     --sel: #6ab8ff;
     --sel-bg: rgba(10, 132, 255, 0.18);
     --sug-soft: rgba(143, 58, 194, 0.26);
+    --sug-text: #d9a8f5;
+    --canvas: #1c1c1e;
+    --chip-bg: rgba(44, 44, 48, 0.92);
+    --fill-3: rgba(118, 118, 128, 0.24);
+    --grp-bg: #000000;
+    --grp-row: #1c1c1e;
+    --sep: rgba(84, 84, 88, 0.6);
+    --switch-on: #30d158;
+    --switch-off: rgba(120, 120, 128, 0.36);
   }
 }
 
@@ -55,8 +73,10 @@
   .demo-grid { grid-template-columns: auto 1fr; align-items: start; justify-items: start; gap: 32px; }
 }
 
-/* Phone frame */
-.phone {
+/* Device frame. The iPhone is the default; the iPad block near the end of this file redraws it.
+   demo.js reads --device to know which one is showing. */
+.demo { --device: phone; }
+.device {
   position: relative;
   width: 300px; max-width: 100%;
   padding: 10px;
@@ -65,10 +85,12 @@
   box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 18px 40px rgba(16, 24, 40, 0.18);
 }
 /* The island: a black pill over the top of the screen, between the time and the icons. */
-.phone::before { content: ""; position: absolute; top: 16px; left: 50%; width: 80px; height: 22px; margin-left: -40px; border-radius: 999px; background: #000; z-index: 4; pointer-events: none; }
-/* The screen: the app's editor. Status bar and top bar stay put, the capture scrolls between them
-   and the tool bar, so it can't slide under the island or the rounded corners. */
+.device::before { content: ""; position: absolute; top: 16px; left: 50%; width: 80px; height: 22px; margin-left: -40px; border-radius: 999px; background: #000; z-index: 4; pointer-events: none; }
+.demo .on-ipad { display: none; }
+/* The screen: the app's editor. Status bar and top bar stay put; the capture scrolls on the canvas
+   between them and the tool bar, as in EditorView. */
 .app {
+  position: relative;
   display: flex; flex-direction: column;
   height: min(606px, 78vh);
   min-height: 500px;
@@ -78,49 +100,79 @@
   color: var(--pg-text);
   font: 13px/1.2 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
-:where(.app-nav, .cleanup, .app-bar) button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-:where(.app-nav, .cleanup, .app-bar) button:disabled { cursor: default; }
-:where(.app-nav, .cleanup, .app-bar) button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+:where(.app) button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:where(.app) button:disabled { cursor: default; }
+:where(.app-nav, .sug-chip, .cleanup, .app-bar, .inspector) button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .app .ic { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .app .ic .dot { fill: currentColor; stroke: none; }
 .app-status { flex: none; height: 38px; display: flex; align-items: center; justify-content: space-between; padding: 6px 24px 0 28px; font-size: 12px; font-weight: 600; }
+.sb-wifi { display: block; width: 14px; height: 11px; fill: currentColor; }
+.sb-pct { font-size: 11px; }
 .app-nav { flex: none; height: 40px; display: flex; align-items: center; gap: 2px; padding: 0 8px 0 4px; border-bottom: 1px solid var(--bar-line); }
+.nav-start { display: flex; align-items: center; min-width: 0; }
 .nav-btn { width: 26px; height: 32px; display: grid; place-items: center; border-radius: 8px; color: var(--tint); }
 .nav-btn:disabled { opacity: 0.35; }
 .nav-end { margin-left: auto; display: flex; align-items: center; }
 .nav-export { height: 32px; padding: 0 2px 0 6px; border-radius: 8px; font-weight: 600; color: var(--tint); }
 .nav-seg { display: flex; padding: 2px; border-radius: 9px; background: var(--seg); }
 .nav-seg button { height: 26px; padding: 0 9px; border-radius: 7px; font-size: 12px; font-weight: 500; }
-.nav-seg button:disabled { cursor: default; }
 .nav-seg button[aria-pressed="true"] { background: var(--seg-on); font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14); }
 
-.canvas { flex: 1; min-height: 0; position: relative; }
+.app-body { flex: 1; min-height: 0; display: flex; }
+.app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.inspector { display: none; }
+
+/* The canvas: the image on the system's secondary background, fit to the width. */
+.canvas { flex: 1; min-height: 0; position: relative; background: var(--canvas); }
 .screen {
   height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  background: var(--pg-bg);
   color: var(--pg-text);
   scrollbar-width: none; /* a real phone shows no scrollbar; the guide hints at scrolling */
 }
 .screen::-webkit-scrollbar { display: none; }
 .screen:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.pg { background: var(--pg-bg); }
+/* With the chip up, the page starts below it (EditorView's top controls inset); the bar at the
+   bottom gets the same room. */
+.demo.chip-up #page { margin-top: 44px; }
+.demo.reviewing #page { margin-bottom: 58px; }
 
-/* Over the bottom of the canvas, as CleanUpBar sits in the app. */
+/* SuggestionChip: a capsule over the top of the canvas. */
+.sug-chip { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 3; display: flex; align-items: center; gap: 5px; max-width: calc(100% - 24px); height: 30px; padding: 0 11px; border-radius: 15px; white-space: nowrap; font-size: 12px; font-weight: 600; background: var(--chip-bg); box-shadow: 0 0 0 1px var(--bar-line) inset, 0 1px 4px rgba(0, 0, 0, 0.12); }
+.sug-chip[hidden] { display: none; }
+.app .sug-chip .ic { width: 15px; height: 15px; color: var(--sug-text); }
+.app .sug-chip .chev { width: 11px; height: 11px; stroke-width: 2.6; color: var(--pg-muted); }
+.app .sug-chip .chev[hidden] { display: none; }
+
+/* CleanUpBar: over the bottom of the canvas. */
 .cleanup { position: absolute; left: 0; right: 0; bottom: 10px; z-index: 3; display: flex; justify-content: center; gap: 8px; pointer-events: none; }
 .cleanup[hidden] { display: none; }
 .cleanup button { pointer-events: auto; height: 36px; padding: 0 12px; border-radius: 18px; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16); }
 .cu-main { display: flex; align-items: center; gap: 5px; background: var(--sug); color: #fff; }
 .app .cu-main .ic { width: 16px; height: 16px; }
-.cu-review { background: var(--seg); color: var(--sug); }
-@media (prefers-color-scheme: dark) { .cu-review { color: #d9a8f5; } }
-.demo.reviewing #page { padding-bottom: 60px; }
+.cu-review { background: var(--seg); color: var(--sug-text); }
 
+/* EditorToolbar */
 .app-bar { flex: none; border-top: 1px solid var(--bar-line); }
-.redact-row { display: flex; align-items: center; justify-content: space-between; height: 36px; padding: 0 12px; border-bottom: 1px solid var(--bar-line); font-size: 12px; }
+.redact-row { padding: 6px 12px 7px; border-bottom: 1px solid var(--bar-line); }
 .redact-row[hidden] { display: none; }
-.redact-row button { color: var(--tint); font-weight: 600; height: 32px; padding: 0 4px; border-radius: 6px; }
+.rr-head { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+.rr-head button { color: var(--tint); height: 28px; padding: 0 4px; border-radius: 6px; }
+.rr-tiles { display: flex; gap: 5px; margin: 4px 0 5px; overflow-x: auto; scrollbar-width: none; }
+.rr-tiles::-webkit-scrollbar { display: none; }
+.rr-tile { flex: none; min-width: 48px; height: 42px; padding: 0 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 8px; font-size: 9px; white-space: nowrap; background: var(--fill-3); }
+.rr-tile[aria-pressed="true"] { background: var(--sel-bg); color: var(--tint); box-shadow: 0 0 0 1.5px var(--tint) inset; }
+.rr-g { display: block; width: 26px; height: 16px; border-radius: 3px; border: 1px solid currentColor; }
+.rr-black { background: currentColor; }
+.rr-white { background: #fff; border-color: var(--pg-line-2); }
+.rr-pix { background: repeating-conic-gradient(currentColor 0 25%, transparent 0 50%) 0 0 / 6px 6px; opacity: 0.8; }
+.rr-pix-l { background-size: 10px 10px; }
+.rr-blur { background: radial-gradient(currentColor, transparent 75%); opacity: 0.55; }
+.rr-note { display: flex; align-items: center; gap: 4px; margin: 0; font-size: 10px; color: var(--pg-muted); }
+.app .rr-note .ic { width: 11px; height: 11px; }
 .tools { display: flex; gap: 2px; padding: 3px 5px 0; }
 .tool { flex: 1 1 0; min-width: 0; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 9px; }
 .tool:hover { background: var(--pg-soft); }
@@ -156,6 +208,8 @@
 .logo { display: flex; align-items: center; gap: 7px; }
 .logo i { width: 18px; height: 18px; border-radius: 5px; background: var(--pg-text); opacity: 0.85; display: block; }
 .logo b { width: 64px; height: 8px; border-radius: 4px; background: var(--pg-line-2); display: block; }
+.site-nav { align-items: center; gap: 14px; }
+.site-nav b { width: 42px; height: 7px; border-radius: 4px; background: var(--pg-line-2); display: block; }
 
 .pad { padding: 0 16px; }
 .kicker { margin: 14px 0 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cut); }
@@ -338,7 +392,7 @@
 /* Phones: the controls sit beside a smaller phone, the status line below both. */
 @media (max-width: 639px) {
   .demo-grid { grid-template-columns: auto minmax(0, 1fr); justify-items: stretch; align-items: center; gap: 12px; }
-  .phone { zoom: 0.7; }
+  .device { zoom: 0.7; }
   .app { height: min(606px, 74vh); }
   .panel:not([hidden]) { display: contents; }
   .steps { grid-column: 2; grid-row: 1; }
@@ -402,4 +456,125 @@
 @media (max-width: 639px) {
   .ex-scrim { display: block; position: fixed; inset: 0; z-index: 19; background: rgba(0, 0, 0, 0.12); }
   .ex-pop { top: auto; bottom: calc(100% + 8px); width: 300px; }
+}
+
+/* EditorInspector: the iPad's column beside the canvas (CutListSheet and SuggestionsSheet as
+   inset grouped lists under an Edits | Suggestions switch). Shown by the iPad block below. */
+.inspector { flex-direction: column; flex: none; width: var(--insp-w, 300px); min-height: 0; border-left: 1px solid var(--bar-line); background: var(--grp-bg); font-size: 12px; }
+.insp-seg { flex: none; display: flex; margin: 8px 12px 6px; padding: 2px; border-radius: 9px; background: var(--seg); }
+.insp-seg button { flex: 1 1 0; min-width: 0; height: 26px; border-radius: 7px; font-size: 11.5px; font-weight: 500; white-space: nowrap; }
+.insp-seg button[aria-pressed="true"] { background: var(--seg-on); font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14); }
+.insp-pane { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.insp-pane[hidden] { display: none; }
+.insp-tools { flex: none; display: flex; justify-content: flex-end; padding: 0 12px; }
+.insp-link { display: inline-flex; align-items: center; gap: 4px; height: 26px; color: var(--tint); font-size: 12px; }
+.insp-link:disabled { opacity: 0.4; }
+.app .insp-link .ic { width: 14px; height: 14px; }
+.insp-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 16px; text-align: center; color: var(--pg-muted); line-height: 1.35; }
+.insp-empty[hidden] { display: none; }
+.app .insp-empty .ic { width: 30px; height: 30px; margin-bottom: 4px; stroke-width: 1.4; }
+.insp-empty strong { color: var(--pg-text); font-size: 15px; }
+.insp-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 2px 12px 12px; scrollbar-width: thin; }
+.insp-list[hidden] { display: none; }
+.ig-sec[hidden] { display: none; }
+.ig-head { display: flex; align-items: center; gap: 5px; margin: 10px 4px 5px; font-size: 11px; font-weight: 500; color: var(--pg-muted); }
+.app .ig-head .ic { width: 13px; height: 13px; }
+.ig-group { border-radius: 10px; overflow: hidden; background: var(--grp-row); }
+.ig-group:empty { display: none; }
+.ig-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; }
+.ig-row[hidden] { display: none; }
+.ig-row ~ .ig-row:not([hidden]) { background: linear-gradient(var(--sep), var(--sep)) right top / calc(100% - 42px) 1px no-repeat; }
+.ig-main { flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: 8px; text-align: left; border-radius: 6px; }
+.ig-ic { flex: none; width: 24px; display: grid; place-items: center; padding-top: 1px; color: var(--sug-text); }
+.ig-ic.cut { color: var(--tint); }
+.ig-ic.red { color: #ff9500; }
+.app .ig-ic .ic { width: 18px; height: 18px; }
+.ig-txt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ig-title { font-size: 13px; }
+.ig-sub { font-size: 11px; color: var(--pg-muted); font-variant-numeric: tabular-nums; }
+.ig-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 5px; font-size: 10.5px; color: var(--pg-muted); }
+.ig-origin { display: block; }
+.app .ig-meta .ic { display: inline-block; width: 10px; height: 10px; vertical-align: -1px; margin-right: 2px; }
+.ig-row.off .ig-title { color: var(--pg-muted); }
+.ig-row.off .ig-ic { opacity: 0.5; }
+.badge-s { font-size: 8.5px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; padding: 1px 5px; border-radius: 999px; background: var(--sug); color: #fff; }
+.badge-s.maybe { background: transparent; color: var(--sug-text); box-shadow: 0 0 0 1px var(--sug-text) inset; }
+.sw { flex: none; position: relative; width: 36px; height: 22px; border-radius: 11px; background: var(--switch-off); transition: background 0.2s; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); transition: transform 0.2s; }
+.sw[aria-checked="true"] { background: var(--switch-on); }
+.sw.sug[aria-checked="true"] { background: var(--sug); }
+.sw[aria-checked="true"]::after { transform: translateX(14px); }
+.ig-foot { margin: 6px 4px 0; font-size: 10.5px; line-height: 1.35; color: var(--pg-muted); font-variant-numeric: tabular-nums; }
+.insp-apply { flex: none; display: flex; justify-content: center; gap: 8px; padding: 8px 10px 14px; border-top: 1px solid var(--bar-line); background: var(--bar); }
+.insp-apply[hidden] { display: none; }
+.insp-apply button { height: 32px; padding: 0 14px; border-radius: 16px; font-size: 12.5px; font-weight: 600; }
+.ap-all { background: var(--fill-3); }
+.ap-sel { background: var(--sug); color: #fff; }
+.ap-sel:disabled { opacity: 0.45; }
+@media (prefers-reduced-motion: reduce) { .sw, .sw::after { transition: none; } }
+
+/* iPad: at tablet widths (or a touch screen of tablet size) the demo draws an iPad in landscape
+   showing the app's regular-width editor: the project title in the top bar, the tools under the
+   canvas only, and the inspector column (EditorView's SidePanelPresentation). The frame and the
+   layout are set by the variables just below; the rest only rearranges the same parts. */
+@media (min-width: 700px) and (max-width: 1099px), (hover: none) and (pointer: coarse) and (min-width: 700px) and (max-width: 1400px) {
+  .demo {
+    --device: ipad;
+    --ipad-w: min(calc(100vw - 32px), 960px);  /* frame width, wider than the page column */
+    --ipad-aspect: 1180 / 820;                 /* screen shape: an 11-inch iPad in landscape, in points */
+    --ipad-bezel: 12px;                        /* thin and even all round */
+    --ipad-radius: 30px;
+    --insp-w: clamp(220px, 31%, 300px);        /* the app's inspector is 340 pt of 1180 */
+  }
+  .demo-grid { width: var(--ipad-w); margin-left: calc((100% - var(--ipad-w)) / 2); grid-template-columns: minmax(0, 1fr); justify-items: stretch; gap: 20px; }
+  .device { width: 100%; padding: var(--ipad-bezel); border-radius: var(--ipad-radius); }
+  /* No island: a small front camera in the middle of the top bezel. */
+  .device::before { top: calc(var(--ipad-bezel) / 2 - 2.5px); width: 5px; height: 5px; margin-left: -2.5px; background: #07080a; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07); }
+  .demo .on-phone { display: none; }
+  .demo .on-ipad { display: revert; }
+  .demo .sb-wifi.on-ipad { display: block; }
+  .demo .site-nav.on-ipad, .demo .nav-title.on-ipad { display: flex; }
+  .app { height: auto; aspect-ratio: var(--ipad-aspect); max-height: 84vh; min-height: 0; border-radius: calc(var(--ipad-radius) - var(--ipad-bezel)); }
+  /* The home indicator sits over the bottom of the whole screen. */
+  .app::after { content: ""; position: absolute; left: 50%; bottom: 5px; width: 120px; height: 4px; margin-left: -60px; border-radius: 2px; background: var(--pg-text); opacity: 0.85; pointer-events: none; z-index: 5; }
+  .app-status { height: 24px; padding: 2px 20px 0; font-size: 11px; }
+  .app-nav { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); height: 44px; padding: 0 10px 0 6px; }
+  .nav-title { flex-direction: column; align-items: flex-start; min-width: 0; margin-left: 2px; padding: 2px 6px; border-radius: 8px; text-align: left; }
+  .nav-title strong { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
+  .nav-title small { display: flex; align-items: center; gap: 3px; font-size: 10px; color: var(--pg-muted); }
+  .app .nav-title .ic { width: 10px; height: 10px; stroke-width: 2.2; }
+  .nav-end { justify-self: end; gap: 4px; }
+  .nav-btn { width: 30px; }
+  .inspector { display: flex; }
+  .demo.insp-closed .inspector { display: none; }
+  .tools { gap: 4px; padding: 4px 8px 12px; }
+  .tool { height: 46px; }
+  .tool-t { font-size: 10.5px; }
+  .sb-pop { top: 80px; }
+
+  /* The page, as the same site lays out on the wider screen. */
+  .pg { font-size: 13px; }
+  .sbar { height: 24px; padding: 0 20px; font-size: 11px; }
+  .site { justify-content: space-between; padding: 12px 28px 6px; }
+  .pad { padding: 0 28px; }
+  .kicker { margin-top: 18px; }
+  .hl { font-size: 26px; }
+  .photo { height: auto; aspect-ratio: 960 / 450; margin: 0 28px; }
+  .cap { margin: 8px 28px 14px; font-size: 11px; }
+  .ad, .signup, .related, .foot { margin-left: 28px; margin-right: 28px; }
+  .gap { height: 200px; }
+
+  /* The controls in a row under the iPad. */
+  .panel { max-width: none; }
+  .steps { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+  .steps li { align-items: center; gap: 8px; margin: 0; }
+  .steps li::before { margin-top: 0; }
+  .steps .hint { display: none; }
+  .demo-status { margin: 14px 0 6px; }
+}
+/* A touch tablet of 1100 px or more (an iPad in landscape) gets the iPad too, so the page keeps the
+   stacked layout instead of style.css's side-by-side one. */
+@media (hover: none) and (pointer: coarse) and (min-width: 1100px) and (max-width: 1400px) {
+  main { display: block; }
+  .wrap { max-width: 1040px; }
 }
