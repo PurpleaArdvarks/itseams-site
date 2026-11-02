@@ -61,8 +61,12 @@
     return Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0) >= r.height / 2;
   }
 
-  // An element's position in the scrolling page (offsets are measured from the phone frame).
-  function top(el) { return el.offsetTop - screen.offsetTop; }
+  // An element's position in the scrolling page: offsets add up to the canvas that holds the screen.
+  function top(el) {
+    var y = 0;
+    for (; el && el !== screen.offsetParent; el = el.offsetParent) y += el.offsetTop;
+    return y - screen.offsetTop;
+  }
 
   function scrolledToTarget() {
     if (!target) return true;

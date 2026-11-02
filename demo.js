@@ -17,6 +17,20 @@
   var btnReset = document.getElementById('btn-reset');
   var status = document.getElementById('status');
 
+  // The app's own controls on the phone screen. The ones that work here do what the buttons
+  // beside the phone do; the rest explain themselves with a popdown (data-say).
+  var navBefore = document.getElementById('nav-before');
+  var navAfter = document.getElementById('nav-after');
+  var navUndo = document.getElementById('nav-undo');
+  var navExport = document.getElementById('nav-export');
+  var cleanup = document.getElementById('cleanup');
+  var cuApply = document.getElementById('cu-apply');
+  var cuCount = document.getElementById('cu-count');
+  var toolRedact = document.getElementById('tool-redact');
+  var toolList = document.getElementById('tool-list');
+  var listBadge = document.getElementById('list-badge');
+  var redactRow = document.getElementById('redact-row');
+
   var SEAM = 2;    // height of the join line left where a band was cut (px)
   var DUR = 380;   // matches --dur in demo.css
   var INITIAL = 'Scroll the page, then tap Clean Up.';
@@ -68,6 +82,7 @@
       setOn(band, on);
       if (state === 'applied') editApplied(band, on);
       else reviewSummary();
+      syncApp();
     });
     band._chip = chip;
     band._maybe = maybe;
@@ -124,10 +139,32 @@
   }
 
   function setCompare(enabled) {
-    btnBefore.disabled = !enabled;
-    btnAfter.disabled = !enabled;
-    btnBefore.setAttribute('aria-pressed', view === 'before' ? 'true' : 'false');
-    btnAfter.setAttribute('aria-pressed', view === 'after' ? 'true' : 'false');
+    // Until something is applied the editor shows Before, as the app does.
+    var before = !enabled || view === 'before';
+    [btnBefore, navBefore].forEach(function (b) {
+      b.disabled = !enabled;
+      b.setAttribute('aria-pressed', before ? 'true' : 'false');
+    });
+    [btnAfter, navAfter].forEach(function (b) {
+      b.disabled = !enabled;
+      b.setAttribute('aria-pressed', before ? 'false' : 'true');
+    });
+    syncApp();
+  }
+
+  // Everything on the phone screen that follows the demo's state.
+  function syncApp() {
+    var on = bands.filter(isOn).length;
+    cleanup.hidden = state !== 'review' || on === 0;
+    cuCount.textContent = on;
+    cuApply.setAttribute('aria-label', 'Clean Up, ' + plural(on, 'suggestion', 'suggestions'));
+    var edits = applied.length + coveredCount();
+    listBadge.hidden = edits === 0;
+    listBadge.textContent = edits;
+    toolList.setAttribute('aria-label', edits ? 'List, ' + plural(edits, 'edit', 'edits') : 'List');
+    navUndo.disabled = edits === 0;
+    toolRedact.setAttribute('aria-pressed', redacting ? 'true' : 'false');
+    redactRow.hidden = !redacting;
   }
 
   // 1. Clean Up: show the suggestions. Nothing changes yet.
@@ -145,6 +182,7 @@
     var text = plural(bands.length, 'suggestion', 'suggestions') + ' found. ' + strong + ' ' + (strong === 1 ? 'is' : 'are') + ' on';
     if (maybe) text += ', and ' + maybe + ' Maybe ' + (maybe === 1 ? 'waits' : 'wait') + ' for you';
     say(text + '. Scroll the page to review them.');
+    syncApp();
   });
 
   // 2. Apply: collapse the bands that are switched on.
@@ -228,6 +266,7 @@
       n.tabIndex = on ? 0 : -1;
       n.setAttribute('aria-disabled', on ? 'false' : 'true');
     });
+    syncApp();
   }
 
   function coveredCount() {
@@ -268,6 +307,7 @@
       setRedacted(n, !n.classList.contains('redacted'));
       var c = coveredCount();
       say(c === 0 ? 'No names covered.' : plural(c, 'name', 'names') + ' covered.');
+      syncApp();
     });
   });
 
@@ -280,7 +320,7 @@
   var popTimer = 0;
   function hidePop() { pop.classList.add('off'); }
   function showPop(text) {
-    pop.textContent = text;
+    pop.textContent = words(text);
     pop.classList.remove('off');
     clearTimeout(popTimer);
     popTimer = setTimeout(hidePop, 2800);
@@ -292,6 +332,20 @@
     });
   });
   document.addEventListener('click', hidePop);
+
+  // The app's controls: the ones that work here press the matching button beside the phone.
+  toArray(phone.querySelectorAll('.app-nav [data-say], .cleanup [data-say], .tools [data-say]')).forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      showPop(b.getAttribute('data-say'));
+    });
+  });
+  function press(el, button) { el.addEventListener('click', function () { button.click(); }); }
+  press(navBefore, btnBefore);
+  press(navAfter, btnAfter);
+  press(cuApply, btnApply);
+  press(toolRedact, btnRedact);
+  press(document.getElementById('redact-done'), btnRedact);
 
   // The car ad's play button and the sign-up box answer like the status bar does.
   toArray(page.querySelectorAll('.vid-play, .signup .go')).forEach(function (b) {
@@ -445,6 +499,7 @@
     exPop.hidden = false;
     exScrim.hidden = false;
     btnExport.setAttribute('aria-expanded', 'true');
+    navExport.setAttribute('aria-expanded', 'true');
     choose(preset);
     exOpts.filter(function (o) { return o.getAttribute('data-preset') === preset; })[0].focus();
     if (exPop.scrollIntoView) {
@@ -457,6 +512,7 @@
     exPop.hidden = true;
     exScrim.hidden = true;
     btnExport.setAttribute('aria-expanded', 'false');
+    navExport.setAttribute('aria-expanded', 'false');
     exSim.textContent = '';
     if (refocus) btnExport.focus();
   }
@@ -465,6 +521,7 @@
     if (exportOpen()) closeExport(true);
     else openExport();
   });
+  press(navExport, btnExport);
   document.getElementById('ex-close').addEventListener('click', function () { closeExport(true); });
   exOpts.forEach(function (o) {
     o.addEventListener('click', function () { choose(o.getAttribute('data-preset')); });
@@ -473,11 +530,11 @@
     if (exportOpen() && (e.key === 'Escape' || e.key === 'Esc')) { e.preventDefault(); closeExport(true); }
   });
   document.addEventListener('pointerdown', function (e) {
-    if (exportOpen() && !exPop.contains(e.target) && !btnExport.contains(e.target)) closeExport(false);
+    if (exportOpen() && !exPop.contains(e.target) && !btnExport.contains(e.target) && !navExport.contains(e.target)) closeExport(false);
   }, true);
   exPop.addEventListener('focusout', function (e) {
     var to = e.relatedTarget;
-    if (to && !exPop.contains(to) && to !== btnExport) closeExport(false);
+    if (to && !exPop.contains(to) && to !== btnExport && to !== navExport) closeExport(false);
   });
 
   // Start over.

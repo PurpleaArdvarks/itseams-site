@@ -13,6 +13,17 @@
   --maybe-soft: rgba(214, 140, 0, 0.14);
   --ink: #111318;
   --dur: 380ms;
+  /* The app's editor chrome (Shared/Editor colours). */
+  --bar: #f6f6f8;
+  --bar-line: #d9dbe0;
+  --seg: #e4e5e9;
+  --seg-on: #ffffff;
+  --tint: #007aff;
+  --sel: #0055bb;
+  --sel-bg: rgba(0, 122, 255, 0.18);
+  --badge: #0066d9;
+  --sug: #8f3ac2;
+  --sug-soft: rgba(143, 58, 194, 0.12);
 }
 @media (prefers-color-scheme: dark) {
   .demo {
@@ -28,6 +39,14 @@
     --maybe: #f0b44c;
     --maybe-soft: rgba(240, 180, 76, 0.16);
     --ink: #f2f3f5; /* redactions read as solid boxes on the dark page */
+    --bar: #1f2228;
+    --bar-line: #363a43;
+    --seg: #30343c;
+    --seg-on: #5a5f6b;
+    --tint: #4ea1ff;
+    --sel: #6ab8ff;
+    --sel-bg: rgba(10, 132, 255, 0.18);
+    --sug-soft: rgba(143, 58, 194, 0.26);
   }
 }
 
@@ -47,10 +66,37 @@
 }
 /* The island: a black pill over the top of the screen, between the time and the icons. */
 .phone::before { content: ""; position: absolute; top: 16px; left: 50%; width: 80px; height: 22px; margin-left: -40px; border-radius: 999px; background: #000; z-index: 4; pointer-events: none; }
-.screen {
-  height: min(560px, 62vh);
-  min-height: 420px;
+/* The screen: the app's editor. Status bar and top bar stay put, the capture scrolls between them
+   and the tool bar, so it can't slide under the island or the rounded corners. */
+.app {
+  display: flex; flex-direction: column;
+  height: min(606px, 78vh);
+  min-height: 500px;
   border-radius: 34px;
+  overflow: hidden;
+  background: var(--bar);
+  color: var(--pg-text);
+  font: 13px/1.2 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+:where(.app-nav, .cleanup, .app-bar) button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:where(.app-nav, .cleanup, .app-bar) button:disabled { cursor: default; }
+:where(.app-nav, .cleanup, .app-bar) button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.app .ic { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.app .ic .dot { fill: currentColor; stroke: none; }
+.app-status { flex: none; height: 38px; display: flex; align-items: center; justify-content: space-between; padding: 6px 24px 0 28px; font-size: 12px; font-weight: 600; }
+.app-nav { flex: none; height: 40px; display: flex; align-items: center; gap: 2px; padding: 0 8px 0 4px; border-bottom: 1px solid var(--bar-line); }
+.nav-btn { width: 26px; height: 32px; display: grid; place-items: center; border-radius: 8px; color: var(--tint); }
+.nav-btn:disabled { opacity: 0.35; }
+.nav-end { margin-left: auto; display: flex; align-items: center; }
+.nav-export { height: 32px; padding: 0 2px 0 6px; border-radius: 8px; font-weight: 600; color: var(--tint); }
+.nav-seg { display: flex; padding: 2px; border-radius: 9px; background: var(--seg); }
+.nav-seg button { height: 26px; padding: 0 9px; border-radius: 7px; font-size: 12px; font-weight: 500; }
+.nav-seg button:disabled { cursor: default; }
+.nav-seg button[aria-pressed="true"] { background: var(--seg-on); font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14); }
+
+.canvas { flex: 1; min-height: 0; position: relative; }
+.screen {
+  height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -59,7 +105,31 @@
   scrollbar-width: none; /* a real phone shows no scrollbar; the guide hints at scrolling */
 }
 .screen::-webkit-scrollbar { display: none; }
-.screen:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.screen:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+
+/* Over the bottom of the canvas, as CleanUpBar sits in the app. */
+.cleanup { position: absolute; left: 0; right: 0; bottom: 10px; z-index: 3; display: flex; justify-content: center; gap: 8px; pointer-events: none; }
+.cleanup[hidden] { display: none; }
+.cleanup button { pointer-events: auto; height: 36px; padding: 0 12px; border-radius: 18px; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16); }
+.cu-main { display: flex; align-items: center; gap: 5px; background: var(--sug); color: #fff; }
+.app .cu-main .ic { width: 16px; height: 16px; }
+.cu-review { background: var(--seg); color: var(--sug); }
+@media (prefers-color-scheme: dark) { .cu-review { color: #d9a8f5; } }
+.demo.reviewing #page { padding-bottom: 60px; }
+
+.app-bar { flex: none; border-top: 1px solid var(--bar-line); }
+.redact-row { display: flex; align-items: center; justify-content: space-between; height: 36px; padding: 0 12px; border-bottom: 1px solid var(--bar-line); font-size: 12px; }
+.redact-row[hidden] { display: none; }
+.redact-row button { color: var(--tint); font-weight: 600; height: 32px; padding: 0 4px; border-radius: 6px; }
+.tools { display: flex; gap: 2px; padding: 3px 5px 0; }
+.tool { flex: 1 1 0; min-width: 0; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 9px; }
+.tool:hover { background: var(--pg-soft); }
+.tool[aria-pressed="true"] { background: var(--sel-bg); color: var(--sel); }
+.tool-ic { position: relative; display: block; }
+.tool-t { font-size: 10px; line-height: 12px; white-space: nowrap; }
+.tool-badge { position: absolute; left: 13px; top: -5px; min-width: 14px; padding: 0 3px; border-radius: 7px; background: var(--badge); color: #fff; font-size: 9.5px; line-height: 14px; font-weight: 700; text-align: center; }
+.tool-badge[hidden] { display: none; }
+.home-ind { width: 96px; height: 4px; margin: 6px auto 6px; border-radius: 2px; background: var(--pg-text); }
 
 /* Mock page */
 .pg { font: 12px/1.5 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; padding-bottom: 18px; }
@@ -80,7 +150,7 @@
 
 .sb-btn { font: inherit; color: inherit; background: none; border: 0; padding: 3px 4px; margin: -3px -4px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; }
 .sb-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.sb-pop { position: absolute; left: 50%; top: 46px; transform: translateX(-50%); width: calc(100% - 48px); max-width: 250px; z-index: 7; padding: 9px 12px; border-radius: 12px; background: rgba(24, 27, 33, 0.92); color: #fff; font: 500 12px/1.35 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; text-align: center; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); transition: opacity 0.2s, transform 0.2s; }
+.sb-pop { position: absolute; left: 50%; top: 94px; transform: translateX(-50%); width: calc(100% - 48px); max-width: 250px; z-index: 7; padding: 9px 12px; border-radius: 12px; background: rgba(24, 27, 33, 0.92); color: #fff; font: 500 12px/1.35 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; text-align: center; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); transition: opacity 0.2s, transform 0.2s; }
 .sb-pop.off { opacity: 0; transform: translate(-50%, -6px); pointer-events: none; }
 .site { display: flex; align-items: center; padding: 10px 16px 4px; }
 .logo { display: flex; align-items: center; gap: 7px; }
@@ -162,15 +232,15 @@
 .nm:focus-visible { outline: 2px solid var(--cut); outline-offset: 1px; }
 
 /* Suggestions */
-.demo.reviewing .band.sug { box-shadow: 0 0 0 2px var(--cut) inset; background: var(--cut-soft); }
-.demo.reviewing .band.sug.off { box-shadow: 0 0 0 1.5px var(--pg-line-2) inset; background: transparent; }
-.demo.reviewing .band.sug.off.maybe { box-shadow: 0 0 0 1.5px var(--maybe) inset; background: var(--maybe-soft); }
+.demo.reviewing .band.sug { outline: 2px dashed var(--sug); outline-offset: -2px; background: var(--sug-soft); }
+.demo.reviewing .band.sug.off { outline: 1.5px dashed var(--pg-line-2); background: transparent; }
+.demo.reviewing .band.sug.off.maybe { outline: 1.5px dashed var(--maybe); background: var(--maybe-soft); }
 .chip {
   position: absolute; top: 6px; right: 8px; z-index: 2;
   display: inline-flex; align-items: center; gap: 5px;
   font: 600 11px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   padding: 5px 9px 5px 7px; border-radius: 999px; border: 0; cursor: pointer;
-  background: var(--cut); color: #fff;
+  background: var(--sug); color: #fff;
 }
 .chip::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1.5px #fff inset; }
 .chip[aria-pressed="false"] { background: var(--pg-bg); color: var(--pg-text); box-shadow: 0 0 0 1px var(--pg-line-2); }
@@ -269,7 +339,7 @@
 @media (max-width: 639px) {
   .demo-grid { grid-template-columns: auto minmax(0, 1fr); justify-items: stretch; align-items: center; gap: 12px; }
   .phone { zoom: 0.7; }
-  .screen { height: min(620px, 64vh); min-height: 380px; }
+  .app { height: min(606px, 74vh); }
   .panel:not([hidden]) { display: contents; }
   .steps { grid-column: 2; grid-row: 1; }
   .steps li { margin: 0 0 10px; }
