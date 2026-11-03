@@ -73,9 +73,8 @@
   .demo-grid { grid-template-columns: auto 1fr; align-items: start; justify-items: start; gap: 32px; }
 }
 
-/* Device frame. The iPhone is the default; the iPad block near the end of this file redraws it.
-   demo.js reads --device to know which one is showing. */
-.demo { --device: phone; }
+/* Device frame. The iPhone is the default; the iPad block near the end of this file redraws it
+   when demo.js adds .ipad to the demo. */
 .device {
   position: relative;
   width: 300px; max-width: 100%;
@@ -204,12 +203,15 @@
 .sb-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .sb-pop { position: absolute; left: 50%; top: 94px; transform: translateX(-50%); width: calc(100% - 48px); max-width: 250px; z-index: 7; padding: 9px 12px; border-radius: 12px; background: rgba(24, 27, 33, 0.92); color: #fff; font: 500 12px/1.35 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; text-align: center; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); transition: opacity 0.2s, transform 0.2s; }
 .sb-pop.off { opacity: 0; transform: translate(-50%, -6px); pointer-events: none; }
-.site { display: flex; align-items: center; padding: 10px 16px 4px; }
+/* The captured site's masthead: an invented local paper, its mark drawn here. */
+.site { display: flex; align-items: center; padding: 10px 16px 6px; border-bottom: 1px solid var(--pg-line); }
 .logo { display: flex; align-items: center; gap: 7px; }
-.logo i { width: 18px; height: 18px; border-radius: 5px; background: var(--pg-text); opacity: 0.85; display: block; }
-.logo b { width: 64px; height: 8px; border-radius: 4px; background: var(--pg-line-2); display: block; }
-.site-nav { align-items: center; gap: 14px; }
-.site-nav b { width: 42px; height: 7px; border-radius: 4px; background: var(--pg-line-2); display: block; }
+.logo-mark { display: block; width: 20px; height: 20px; flex: none; }
+.lm-bg { fill: #1f5f6b; }
+.lm-wave { fill: none; stroke: #fff; stroke-width: 1.8; stroke-linecap: round; }
+.lm-sun { fill: #f2c14e; }
+.logo b { font: 700 15px/1 Georgia, "Times New Roman", serif; letter-spacing: -0.01em; white-space: nowrap; }
+.site-nav { align-items: center; gap: 16px; font-size: 11px; font-weight: 600; color: var(--pg-muted); }
 
 .pad { padding: 0 16px; }
 .kicker { margin: 14px 0 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cut); }
@@ -224,9 +226,7 @@
 }
 .cap { margin: 6px 16px 12px; color: var(--pg-muted); font-size: 10px; }
 .txt p { margin: 0 0 8px; }
-.ln { display: block; height: 7px; border-radius: 4px; background: var(--pg-line); margin: 0 0 8px; }
-.w100 { width: 100%; } .w94 { width: 94%; } .w88 { width: 88%; } .w80 { width: 80%; } .w72 { width: 72%; } .w60 { width: 60%; } .w45 { width: 45%; }
-.lines { padding-block: 4px 6px; }
+.txt { padding-bottom: 4px; }
 
 .ad { margin: 8px 16px 12px; }
 /* Inline video ad: a generic car, drawn here. */
@@ -252,12 +252,6 @@
 .vid-cta b { flex: none; font-size: 10px; padding: 4px 8px; border-radius: 4px; background: var(--pg-soft); color: var(--pg-text); }
 @media (prefers-color-scheme: dark) { .vid-frame { filter: brightness(0.85); } }
 .ad small { display: block; text-align: center; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pg-muted); margin-bottom: 4px; }
-.ad-box {
-  height: 110px; border-radius: 6px; display: grid; place-items: center;
-  background: repeating-linear-gradient(135deg, var(--pg-soft) 0 10px, var(--pg-bg) 10px 20px);
-  border: 1px solid var(--pg-line);
-}
-.ad-box span { width: 92px; height: 28px; border-radius: 14px; background: var(--pg-line-2); display: block; }
 .gap { height: 170px; }
 
 .signup { margin: 8px 16px 14px; padding: 14px; border-radius: 10px; background: var(--pg-soft); border: 1px solid var(--pg-line); }
@@ -269,12 +263,18 @@
 .signup .go:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .related { margin: 6px 16px 0; padding-top: 12px; border-top: 1px solid var(--pg-line); }
-.related strong { display: block; font-size: 12px; margin-bottom: 8px; }
+.related > strong { display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pg-muted); margin-bottom: 8px; }
 .rel { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-.rel i { flex: none; width: 44px; height: 34px; border-radius: 5px; background: var(--pg-line-2); display: block; }
-.rel span { flex: 1; }
-.rel .ln { margin-bottom: 6px; }
-.foot { margin: 8px 16px 0; padding-top: 12px; border-top: 1px solid var(--pg-line); }
+/* Thumbnails: little drawn scenes, so the links read as stories. */
+.rel i { flex: none; width: 44px; height: 34px; border-radius: 5px; display: block; }
+.rel .th-bridge { background: linear-gradient(transparent 52%, #6f7d8c 52% 60%, transparent 60%), linear-gradient(#bfdcef 62%, #6aa3c4 62%); }
+.rel .th-books { background: linear-gradient(90deg, #c8473d 0 20%, #e9c46a 20% 38%, #2a9d8f 38% 58%, #f4a261 58% 76%, #577590 76%) bottom / 100% 70% no-repeat, #efe6d6; }
+.rel .th-boat { background: radial-gradient(circle at 72% 30%, #f2c14e 0 12%, transparent 13%), linear-gradient(#f6d5b8 55%, #4f86a8 55%); }
+@media (prefers-color-scheme: dark) { .rel i { filter: brightness(0.85); } }
+.rel > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.rel b { font-size: 11.5px; line-height: 1.3; }
+.rel small { font-size: 9.5px; color: var(--pg-muted); }
+.foot { margin: 8px 16px 0; padding-top: 10px; border-top: 1px solid var(--pg-line); font-size: 9.5px; color: var(--pg-muted); }
 
 /* Names in the article: plain text until Redact is on */
 .nm {
@@ -513,68 +513,84 @@
 .ap-sel:disabled { opacity: 0.45; }
 @media (prefers-reduced-motion: reduce) { .sw, .sw::after { transition: none; } }
 
-/* iPad: at tablet widths (or a touch screen of tablet size) the demo draws an iPad in landscape
-   showing the app's regular-width editor: the project title in the top bar, the tools under the
-   canvas only, and the inspector column (EditorView's SidePanelPresentation). The frame and the
-   layout are set by the variables just below; the rest only rearranges the same parts. */
-@media (min-width: 700px) and (max-width: 1099px), (hover: none) and (pointer: coarse) and (min-width: 700px) and (max-width: 1400px) {
-  .demo {
-    --device: ipad;
-    --ipad-w: min(calc(100vw - 32px), 960px);  /* frame width, wider than the page column */
-    --ipad-aspect: 1180 / 820;                 /* screen shape: an 11-inch iPad in landscape, in points */
-    --ipad-bezel: 12px;                        /* thin and even all round */
-    --ipad-radius: 30px;
-    --insp-w: clamp(220px, 31%, 300px);        /* the app's inspector is 340 pt of 1180 */
-  }
-  .demo-grid { width: var(--ipad-w); margin-left: calc((100% - var(--ipad-w)) / 2); grid-template-columns: minmax(0, 1fr); justify-items: stretch; gap: 20px; }
-  .device { width: 100%; padding: var(--ipad-bezel); border-radius: var(--ipad-radius); }
-  /* No island: a small front camera in the middle of the top bezel. */
-  .device::before { top: calc(var(--ipad-bezel) / 2 - 2.5px); width: 5px; height: 5px; margin-left: -2.5px; background: #07080a; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07); }
-  .demo .on-phone { display: none; }
-  .demo .on-ipad { display: revert; }
-  .demo .sb-wifi.on-ipad { display: block; }
-  .demo .site-nav.on-ipad, .demo .nav-title.on-ipad { display: flex; }
-  .app { height: auto; aspect-ratio: var(--ipad-aspect); max-height: 84vh; min-height: 0; border-radius: calc(var(--ipad-radius) - var(--ipad-bezel)); }
-  /* The home indicator sits over the bottom of the whole screen. */
-  .app::after { content: ""; position: absolute; left: 50%; bottom: 5px; width: 120px; height: 4px; margin-left: -60px; border-radius: 2px; background: var(--pg-text); opacity: 0.85; pointer-events: none; z-index: 5; }
-  .app-status { height: 24px; padding: 2px 20px 0; font-size: 11px; }
-  .app-nav { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); height: 44px; padding: 0 10px 0 6px; }
-  .nav-title { flex-direction: column; align-items: flex-start; min-width: 0; margin-left: 2px; padding: 2px 6px; border-radius: 8px; text-align: left; }
-  .nav-title strong { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
-  .nav-title small { display: flex; align-items: center; gap: 3px; font-size: 10px; color: var(--pg-muted); }
-  .app .nav-title .ic { width: 10px; height: 10px; stroke-width: 2.2; }
-  .nav-end { justify-self: end; gap: 4px; }
-  .nav-btn { width: 30px; }
-  .inspector { display: flex; }
-  .demo.insp-closed .inspector { display: none; }
-  .tools { gap: 4px; padding: 4px 8px 12px; }
-  .tool { height: 46px; }
-  .tool-t { font-size: 10.5px; }
-  .sb-pop { top: 80px; }
-
-  /* The page, as the same site lays out on the wider screen. */
-  .pg { font-size: 13px; }
-  .sbar { height: 24px; padding: 0 20px; font-size: 11px; }
-  .site { justify-content: space-between; padding: 12px 28px 6px; }
-  .pad { padding: 0 28px; }
-  .kicker { margin-top: 18px; }
-  .hl { font-size: 26px; }
-  .photo { height: auto; aspect-ratio: 960 / 450; margin: 0 28px; }
-  .cap { margin: 8px 28px 14px; font-size: 11px; }
-  .ad, .signup, .related, .foot { margin-left: 28px; margin-right: 28px; }
-  .gap { height: 200px; }
-
-  /* The controls in a row under the iPad. */
-  .panel { max-width: none; }
-  .steps { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
-  .steps li { align-items: center; gap: 8px; margin: 0; }
-  .steps li::before { margin-top: 0; }
-  .steps .hint { display: none; }
-  .demo-status { margin: 14px 0 6px; }
+/* iPad: the demo draws an iPad in landscape showing the app's regular-width editor: the project
+   title in the top bar, the tools under the canvas only, and the inspector column (EditorView's
+   SidePanelPresentation). demo.js adds .ipad at tablet widths (or a touch screen of tablet size),
+   or when the visitor picks iPad. The frame and the layout are set by the variables just below;
+   the rest only rearranges the same parts. */
+.demo.ipad {
+  --ipad-w: min(calc(100vw - 32px), 960px);  /* frame width, wider than the page column */
+  --ipad-aspect: 1180 / 820;                 /* screen shape: an 11-inch iPad in landscape, in points */
+  --ipad-bezel: 12px;                        /* thin and even all round */
+  --ipad-radius: 30px;
+  --insp-w: clamp(220px, 31%, 300px);        /* the app's inspector is 340 pt of 1180 */
 }
-/* A touch tablet of 1100 px or more (an iPad in landscape) gets the iPad too, so the page keeps the
+.demo.ipad .demo-grid { width: var(--ipad-w); margin-left: calc((100% - var(--ipad-w)) / 2); grid-template-columns: minmax(0, 1fr); justify-items: stretch; gap: 20px; }
+.demo.ipad .device { width: 100%; padding: var(--ipad-bezel); border-radius: var(--ipad-radius); }
+/* No island: a small front camera in the middle of the top bezel. */
+.demo.ipad .device::before { top: calc(var(--ipad-bezel) / 2 - 2.5px); width: 5px; height: 5px; margin-left: -2.5px; background: #07080a; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07); }
+.demo.ipad .on-phone { display: none; }
+.demo.ipad .on-ipad { display: revert; }
+.demo.ipad .sb-wifi.on-ipad { display: block; }
+.demo.ipad .site-nav.on-ipad, .demo.ipad .nav-title.on-ipad { display: flex; }
+.demo.ipad .app { height: auto; aspect-ratio: var(--ipad-aspect); max-height: 84vh; min-height: 0; border-radius: calc(var(--ipad-radius) - var(--ipad-bezel)); }
+/* The home indicator sits over the bottom of the whole screen. */
+.demo.ipad .app::after { content: ""; position: absolute; left: 50%; bottom: 5px; width: 120px; height: 4px; margin-left: -60px; border-radius: 2px; background: var(--pg-text); opacity: 0.85; pointer-events: none; z-index: 5; }
+.demo.ipad .app-status { height: 24px; padding: 2px 20px 0; font-size: 11px; }
+.demo.ipad .app-nav { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); height: 44px; padding: 0 10px 0 6px; }
+.demo.ipad .nav-title { flex-direction: column; align-items: flex-start; min-width: 0; margin-left: 2px; padding: 2px 6px; border-radius: 8px; text-align: left; }
+.demo.ipad .nav-title strong { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
+.demo.ipad .nav-title small { display: flex; align-items: center; gap: 3px; font-size: 10px; color: var(--pg-muted); }
+.demo.ipad .app .nav-title .ic { width: 10px; height: 10px; stroke-width: 2.2; }
+.demo.ipad .nav-end { justify-self: end; gap: 4px; }
+.demo.ipad .nav-btn { width: 30px; }
+.demo.ipad .inspector { display: flex; }
+.demo.ipad.insp-closed .inspector { display: none; }
+.demo.ipad .tools { gap: 4px; padding: 4px 8px 12px; }
+.demo.ipad .tool { height: 46px; }
+.demo.ipad .tool-t { font-size: 10.5px; }
+.demo.ipad .sb-pop { top: 80px; }
+
+/* The page, as the same site lays out on the wider screen. */
+.demo.ipad .pg { font-size: 13px; }
+.demo.ipad .sbar { height: 24px; padding: 0 20px; font-size: 11px; }
+.demo.ipad .site { justify-content: space-between; padding: 12px 28px 6px; }
+.demo.ipad .pad { padding: 0 28px; }
+.demo.ipad .kicker { margin-top: 18px; }
+.demo.ipad .hl { font-size: 26px; }
+.demo.ipad .photo { height: auto; aspect-ratio: 960 / 450; margin: 0 28px; }
+.demo.ipad .cap { margin: 8px 28px 14px; font-size: 11px; }
+.demo.ipad :is(.ad, .signup, .related, .foot) { margin-left: 28px; margin-right: 28px; }
+.demo.ipad .gap { height: 200px; }
+
+/* The controls in a row under the iPad. */
+.demo.ipad .panel { max-width: none; }
+.demo.ipad .steps { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; grid-column: 1; grid-row: auto; }
+.demo.ipad .steps li { align-items: center; gap: 8px; margin: 0; }
+.demo.ipad .steps li::before { margin-top: 0; }
+.demo.ipad .steps .hint { display: none; }
+.demo.ipad .demo-status { margin: 14px 0 6px; }
+
+/* iPad picked on a screen narrower than the frame: demo.js lays the iPad out at its smallest
+   width and zooms it down to fit, so nothing overflows the page. */
+.demo.ipad.fit { --ipad-w: 100%; }
+.demo.ipad.fit .device { width: 720px; max-width: none; }
+@media (max-width: 639px) {
+  .demo.ipad .steps li::before { display: none; }
+  .demo.ipad .steps .btn { width: auto; padding: 10px 14px; }
+  .demo.ipad .steps .seg { flex-direction: row; width: auto; }
+}
+/* Wide screens with the iPad showing (an iPad in landscape, or iPad picked): the page keeps the
    stacked layout instead of style.css's side-by-side one. */
-@media (hover: none) and (pointer: coarse) and (min-width: 1100px) and (max-width: 1400px) {
-  main { display: block; }
-  .wrap { max-width: 1040px; }
+@media (min-width: 1100px) {
+  html.demo-ipad main { display: block; }
+  html.demo-ipad .wrap { max-width: 1040px; }
 }
+
+/* iPhone | iPad switch above the demo. */
+.dev-switch { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 14px; color: var(--muted); }
+.dev-switch[hidden] { display: none; }
+.dev-seg .dev-btn { font: 600 14px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; min-height: 34px; padding: 6px 14px; border: 0; border-radius: 9px; background: transparent; color: var(--text); cursor: pointer; }
+.dev-seg .dev-btn[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); }
+.demo.ipad .dev-switch { width: var(--ipad-w); margin-left: calc((100% - var(--ipad-w)) / 2); }
+@media (max-width: 639px) { .dev-switch { margin-bottom: 10px; } .dev-seg .dev-btn { min-height: 40px; } }

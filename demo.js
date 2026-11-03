@@ -43,8 +43,25 @@
   var motion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   function animated() { return !(motion && motion.matches); }
 
-  // iPhone or iPad: demo.css decides (--device), so the breakpoints live in one place.
-  function isIpad() { return getComputedStyle(demo).getPropertyValue('--device').trim() === 'ipad'; }
+  // iPhone or iPad: the iPad at tablet widths (or a touch screen of tablet size) unless the visitor
+  // picks one with the switch above the demo. demo.css draws whichever .ipad says.
+  var TABLET = '(min-width: 700px) and (max-width: 1099px), (hover: none) and (pointer: coarse) and (min-width: 700px) and (max-width: 1400px)';
+  var IPAD_MIN = 720;  // narrowest the iPad is laid out; below that it's zoomed down to fit
+  var tablet = window.matchMedia ? window.matchMedia(TABLET) : null;
+  var picked = null;   // null (follow the width) | 'phone' | 'ipad'
+  function isIpad() { return demo.classList.contains('ipad'); }
+  function setDevice() {
+    var ipad = picked ? picked === 'ipad' : !!(tablet && tablet.matches);
+    demo.classList.toggle('ipad', ipad);
+    document.documentElement.classList.toggle('demo-ipad', ipad);
+    var room = demo.clientWidth;
+    var fit = ipad && room > 0 && room < IPAD_MIN;
+    demo.classList.toggle('fit', fit);
+    var dev = demo.querySelector('.device');
+    if (dev) dev.style.zoom = fit ? String(Math.floor(room / IPAD_MIN * 1000) / 1000) : '';
+    return ipad;
+  }
+  setDevice();
 
   function toArray(list) { return Array.prototype.slice.call(list); }
   function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
@@ -660,16 +677,56 @@
     if (next) editsRows.insertBefore(n._eRow, next);
   });
 
-  // Rotating an iPad or resizing a window can switch devices: lay the inspector out again, and
-  // measure again while nothing is cut.
+  // The switch above the demo: a radio group (arrow keys move and choose, as in a native one).
+  var devSwitch = document.getElementById('dev-switch');
+  var devBtns = [document.getElementById('dev-phone'), document.getElementById('dev-ipad')];
+  function syncSwitch() {
+    var ipad = isIpad();
+    devBtns.forEach(function (b, i) {
+      var on = (i === 1) === ipad;
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.tabIndex = on ? 0 : -1;
+    });
+  }
+
+  // Rotating an iPad, resizing a window or the switch can change devices: lay the inspector out
+  // again, and measure again while nothing is cut.
   var lastIpad = isIpad();
-  window.addEventListener('resize', function () {
-    var now = isIpad();
+  function deviceChanged() {
+    var now = setDevice();
+    syncSwitch();
     if (now === lastIpad) return;
     lastIpad = now;
     if (state !== 'applied') measured = null;
+    hidePop();
     syncApp();
+  }
+  window.addEventListener('resize', deviceChanged);
+
+  function pick(i, focus) {
+    picked = i === 1 ? 'ipad' : 'phone';
+    deviceChanged();
+    var b = devBtns[i];
+    if (focus) b.focus();
+    // On a wide screen the page rearranges around the iPad; keep the switch in view.
+    var r = devSwitch.getBoundingClientRect();
+    if ((r.top < 0 || r.bottom > window.innerHeight) && b.scrollIntoView) {
+      try { b.scrollIntoView({ block: 'center', behavior: animated() ? 'smooth' : 'auto' }); } catch (e) { b.scrollIntoView(); }
+    }
+  }
+  devBtns.forEach(function (b, i) {
+    b.addEventListener('click', function () { pick(i, false); });
+    b.addEventListener('keydown', function (e) {
+      var k = e.key;
+      var to = (k === 'ArrowRight' || k === 'ArrowDown' || k === 'ArrowLeft' || k === 'ArrowUp') ? 1 - i
+        : k === 'Home' ? 0 : k === 'End' ? 1 : -1;
+      if (to < 0) return;
+      e.preventDefault();
+      pick(to, true);
+    });
   });
+  syncSwitch();
+  devSwitch.hidden = false;
 
   // 5. Export: three of the app's presets as cartoons. The cut count comes from the real page
   // (applied cuts removed, cuts between lines of content); nothing is rendered to a file.
@@ -682,7 +739,7 @@
   var NS = 'http://www.w3.org/2000/svg';
   var PW = 280;  // page width the cuts are measured at
   // Blocks a cut never goes through: text lines, pictures, boxes.
-  var ATOMS = 'p, .ln, .photo, .vid-frame, .vid-cta, .ad small, .sbar, .site, .signup, .related > strong, .rel';
+  var ATOMS = 'p, .photo, .vid-frame, .vid-cta, .ad small, .sbar, .site, .signup, .related > strong, .rel';
   var PAGE_H = PW * (/-(US|CA|MX)$/i.test(navigator.language || '') ? 11 / 8.5 : 297 / 210);
   var preset = 'posts';
 
