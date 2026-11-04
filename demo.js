@@ -868,9 +868,27 @@
 
   function exportOpen() { return !exPop.hidden; }
 
+  // Beside the device the card hangs from the Export button; keep it on the screen however the
+  // buttons wrap. (On phones and short screens demo.css centres it as a sheet instead.)
+  function placeExport() {
+    exPop.style.right = '';
+    if (getComputedStyle(exPop).position === 'fixed') return;
+    var r = exPop.getBoundingClientRect();
+    var room = document.documentElement.clientWidth;
+    var shift = r.left < 16 ? 16 - r.left : (r.right > room - 16 ? room - 16 - r.right : 0);
+    if (shift) exPop.style.right = -shift + 'px';
+  }
+  var exOpener = btnExport;
+  var exFromNav = false;
+  navExport.addEventListener('click', function () { exFromNav = true; });
+  window.addEventListener('resize', function () { if (!exPop.hidden) placeExport(); });
+
   function openExport() {
+    exOpener = exFromNav ? navExport : btnExport;
+    exFromNav = false;
     exPop.hidden = false;
     exScrim.hidden = false;
+    placeExport();
     btnExport.setAttribute('aria-expanded', 'true');
     navExport.setAttribute('aria-expanded', 'true');
     choose(preset);
@@ -887,7 +905,7 @@
     btnExport.setAttribute('aria-expanded', 'false');
     navExport.setAttribute('aria-expanded', 'false');
     exSim.textContent = '';
-    if (refocus) btnExport.focus();
+    if (refocus) exOpener.focus();
   }
 
   btnExport.addEventListener('click', function () {

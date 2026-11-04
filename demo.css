@@ -411,9 +411,11 @@
   width: 300px; max-width: calc(100vw - 32px); padding: 12px 14px;
   border-radius: 16px; background: var(--card); color: var(--text); border: 1px solid var(--rule);
   box-shadow: 0 12px 32px rgba(16, 24, 40, 0.2); font-size: 14px; line-height: 1.4;
+  scroll-margin: 16px;
 }
+/* The scrim catches a tap outside the card, so it only closes the card and never reaches what's behind. */
+.ex-scrim { position: fixed; inset: 0; z-index: 19; background: transparent; }
 .ex-pop[hidden], .ex-scrim[hidden] { display: none; }
-.ex-scrim { display: none; }
 .ex-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .ex-title { margin: 0; font-size: 16px; }
 .ex-close { font: 600 15px/1 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; color: var(--accent); background: none; border: 0; padding: 8px 4px; margin: -8px -4px; cursor: pointer; }
@@ -452,10 +454,16 @@
 @media (prefers-reduced-motion: reduce) {
   .ex-anim .ex-cut, .ex-anim .ex-scissors, .ex-anim .ex-piece { animation: none; }
 }
-/* Phones: the card opens above the Export button, over a lightly dimmed page. */
-@media (max-width: 639px) {
-  .ex-scrim { display: block; position: fixed; inset: 0; z-index: 19; background: rgba(0, 0, 0, 0.12); }
-  .ex-pop { top: auto; bottom: calc(100% + 8px); width: 300px; }
+/* Phones and short screens: the card is a sheet centred on the screen at full size, over a dimmed
+   page. (An iPad zoomed down to fit a phone would make a card anchored to its Export too small to read.) */
+@media (max-width: 639px), (max-height: 500px) {
+  .ex-scrim { background: rgba(0, 0, 0, 0.45); }
+  .ex-pop {
+    position: fixed; z-index: 20; top: 50%; left: 50%; right: auto; bottom: auto; transform: translate(-50%, -50%);
+    width: min(340px, calc(100vw - 32px)); max-width: none;
+    max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+  }
 }
 
 /* EditorInspector: the iPad's column beside the canvas (CutListSheet and SuggestionsSheet as
