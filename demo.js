@@ -704,8 +704,21 @@
   window.addEventListener('resize', deviceChanged);
 
   function pick(i, focus) {
+    var was = isIpad();
     picked = i === 1 ? 'ipad' : 'phone';
-    deviceChanged();
+    // A smooth change: the frame grows (or shrinks) from one device to the other while the screen
+    // inside cross-fades (the View Transitions API, demo.css). Without it, or with reduced motion,
+    // the switch is instant.
+    if (was !== (i === 1) && animated() && document.startViewTransition) {
+      // A page that isn't painting (a background tab) holds the transition back: change anyway
+      // after a moment, once.
+      var done = false;
+      var change = function () { if (!done) { done = true; deviceChanged(); } };
+      try { document.startViewTransition(change); } catch (e) { change(); }
+      setTimeout(change, 300);
+    } else {
+      deviceChanged();
+    }
     var b = devBtns[i];
     if (focus) b.focus();
     // On a wide screen the page rearranges around the iPad; keep the switch in view.

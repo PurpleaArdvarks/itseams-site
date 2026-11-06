@@ -602,3 +602,20 @@
 .dev-seg .dev-btn[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); }
 .demo.ipad .dev-switch { width: var(--ipad-w); margin-left: calc((100% - var(--ipad-w)) / 2); }
 @media (max-width: 639px) { .dev-switch { margin-bottom: 10px; } .dev-seg .dev-btn { min-height: 40px; } }
+
+/* iPhone ↔ iPad from the switch (demo.js, View Transitions): the frame and the page around it move
+   to their new places while each screen fades into the other, kept to its shape (never squashed). */
+.demo .device { view-transition-name: demo-device; }
+.dev-switch { view-transition-name: demo-switch; }
+::view-transition-group(demo-device), ::view-transition-group(demo-switch), ::view-transition-group(root) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+::view-transition-old(demo-device), ::view-transition-new(demo-device) {
+  height: 100%;
+  object-fit: contain;
+  animation-duration: 0.5s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo .device, .dev-switch { view-transition-name: none; }
+}
